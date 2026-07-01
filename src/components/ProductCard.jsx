@@ -7,9 +7,9 @@ import { Star, ShoppingCart, Eye } from "lucide-react";
 export default function ProductCard({ product, onViewDetails, onAddToCart }) {
   return (
     <div
-      onClick={() => onViewDetails(product.id)}
+      onClick={() => onViewDetails(product._id)}
       className="group bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:border-orange-200 dark:hover:border-orange-950/30 transition-all duration-300 flex flex-col h-full cursor-pointer relative"
-      id={`product-card-${product.id}`}
+      id={`product-card-${product._id}`}
     >
       {/* Product Image Area */}
       <div className="relative w-full aspect-square bg-gray-50 overflow-hidden shrink-0">
@@ -25,7 +25,7 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onViewDetails(product.id);
+              onViewDetails(product._id);
             }}
             className="p-2.5 bg-white text-slate-800 rounded-full shadow-lg hover:bg-orange-500 hover:text-white transition-all transform hover:scale-110"
             title="View Details"
@@ -42,7 +42,7 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
         </div>
 
         <img
-          src={product.images[0]}
+          src={product.images?.[0]?.url}
           alt={product.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-108"
           referrerPolicy="no-referrer"
@@ -53,16 +53,16 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
       <div className="p-4.5 flex flex-col flex-1 gap-2.5">
         {/* Vendor tag */}
         <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest truncate">
-          {product.vendor}
+          {product.brand}
         </span>
 
         {/* Title */}
         <h4 className="text-sm font-bold text-slate-800 dark:text-gray-100 group-hover:text-orange-500 transition-colors line-clamp-2 leading-snug">
-          {product.title}
+          {product.name}
         </h4>
 
         {/* Rating Row */}
-        <div className="flex items-center gap-1.5" id={`product-rating-${product.id}`}>
+        <div className="flex items-center gap-1.5" id={`product-rating-${product._id}`}>
           <div className="flex text-yellow-400">
             {Array.from({ length: 5 }).map((_, i) => (
               <Star
@@ -74,7 +74,7 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
             ))}
           </div>
           <span className="text-[12px] font-bold text-slate-500 dark:text-slate-400">
-            {product.rating.toFixed(1)} <span className="text-gray-300 dark:text-slate-700 font-normal">({product.reviewsCount})</span>
+            {/* {product.rating.toFixed(1)} <span className="text-gray-300 dark:text-slate-700 font-normal">({product.reviewsCount || 0})</span> */}
           </span>
         </div>
 

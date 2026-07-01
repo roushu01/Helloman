@@ -21,7 +21,7 @@ export default function ProductDetails({ product, onBack, onAddToCart, onBuyNow 
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 flex flex-col gap-10" id={`product-detail-view-${product.id}`}>
+    <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 flex flex-col gap-10" id={`product-detail-view-${product._id}`}>
       {/* Breadcrumb Back Button */}
       <button
         onClick={onBack}
@@ -38,26 +38,32 @@ export default function ProductDetails({ product, onBack, onAddToCart, onBuyNow 
           {/* Main Large Image */}
           <div className="w-full aspect-[4/3] bg-gray-50 dark:bg-slate-800 rounded-2xl overflow-hidden border border-gray-150 dark:border-slate-800 shadow-sm relative">
             <img
-              src={product.images[activeImageIndex] || product.images[0]}
-              alt={product.title}
+              src={product.images?.[activeImageIndex]?.url}
+              alt={product.name}
               className="w-full h-full object-cover transition-all duration-300"
               referrerPolicy="no-referrer"
             />
           </div>
 
           {/* Thumbnails Row */}
-          {product.images.length > 1 && (
+          {product.images?.length > 1 && (
             <div className="flex gap-3" id="details-thumbnails-row">
-              {product.images.map((img, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveImageIndex(index)}
-                  className={`w-20 h-20 bg-gray-50 dark:bg-slate-800 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
-                    activeImageIndex === index ? "border-orange-500 scale-102" : "border-transparent opacity-70 hover:opacity-100"
-                  }`}
-                >
-                  <img src={img} alt={`${product.title} thumb ${index + 1}`} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                </button>
+              {product.images?.map((img,index)=>(
+                  <button
+                      key={index}
+                      onClick={()=>setActiveImageIndex(index)}
+                      className={`w-20 h-20 rounded-xl overflow-hidden border-2 ${
+                          activeImageIndex===index
+                          ?"border-orange-500"
+                          :"border-gray-200"
+                      }`}
+                  >
+                      <img
+                          src={img.url}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                      />
+                  </button>
               ))}
             </div>
           )}
@@ -67,12 +73,12 @@ export default function ProductDetails({ product, onBack, onAddToCart, onBuyNow 
         <div className="flex flex-col gap-6">
           {/* Vendor */}
           <span className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-            by {product.vendor}
+            by {product.brand}
           </span>
 
           {/* Title */}
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white leading-tight">
-            {product.title}
+            {product.name}
           </h1>
 
           {/* Star Rating & Review count */}
@@ -82,20 +88,23 @@ export default function ProductDetails({ product, onBack, onAddToCart, onBuyNow 
                 <Star
                   key={i}
                   className={`w-4 h-4 ${
-                    i < Math.floor(product.rating) ? "fill-current text-yellow-400" : "text-gray-200 dark:text-slate-700"
+                    i < Math.floor(product.rating || 0) ? "fill-current text-yellow-400" : "text-gray-200 dark:text-slate-700"
                   }`}
                 />
               ))}
             </div>
             <span className="text-sm font-bold text-slate-600 dark:text-slate-300">
-              {product.rating.toFixed(1)} <span className="text-slate-400 dark:text-slate-500 font-normal">({product.reviewsCount} reviews)</span>
+              {/* {product.rating.toFixed(1)} <span className="text-slate-400 dark:text-slate-500 font-normal">({product.reviewsCount} reviews)</span> */}
             </span>
           </div>
 
           {/* Price Tag */}
           <div className="flex flex-col gap-1.5">
-            <span className="text-3xl font-black text-slate-900 dark:text-white">
-              ₹{product.price.toLocaleString("en-IN")}
+             <span className="text-3xl font-bold text-red-500">
+                ₹{product.discountPrice}
+            </span>
+            <span className="text-3xl line-through font-black text-slate-500 dark:text-white">
+              ₹{product.price}
             </span>
             <span className="text-sm font-bold text-green-600 dark:text-green-400 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -178,7 +187,7 @@ export default function ProductDetails({ product, onBack, onAddToCart, onBuyNow 
         </div>
 
         {/* Product Details Specs Table */}
-        {Object.keys(product.details).length > 0 && (
+        {product.details && Object.keys(product.details).length > 0 && (
           <div className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-4">
             <h2 className="text-lg font-black text-slate-900 dark:text-white border-b border-gray-100 dark:border-slate-800 pb-3 flex items-center gap-2">
               <span>📋</span> Product Details:

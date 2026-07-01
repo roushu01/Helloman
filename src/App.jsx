@@ -12,6 +12,9 @@ import ContactUs from "./components/ContactUs";
 import SellerRegister from "./components/SellerRegister";
 import { PRODUCTS } from "./data";
 import SignupPage from "./components/SignupModel";
+import Profile from "./components/ProfileView";
+
+import { getProducts } from "./api/ProductApi";
 
 import { Grid, List, ChevronDown, CheckCircle, ArrowRight } from "lucide-react";
 
@@ -54,24 +57,36 @@ export default function App() {
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
 
-  // System Theme State
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  
+//Fetch Prodcuts from backend
+  const [products, setProducts] =useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+  fetchProducts();
+      }, []);
+
+      const fetchProducts = async () => {
+        try {
+          const res = await getProducts();
+
+          console.log(res);
+
+          if (res.success) {
+            setProducts(res.products);
+          }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      };
 
   // Dynamic system-level notifications
   const [notification, setNotification] = useState(null);
 
-  // Toggle Dark Mode
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDarkMode]);
+ 
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+
 
   const showNotification = (message, type) => {
     setNotification({ message, type });
@@ -81,14 +96,14 @@ export default function App() {
   // Cart operations
   const handleAddToCart = (product, quantity = 1) => {
     setCartItems((prevItems) => {
-      const existing = prevItems.find((item) => item.product.id === product.id);
+      const existing = prevItems.find((item) => item.product._id === product._id);
       if (existing) {
-        showNotification(`Updated ${product.title.slice(0, 20)}... quantity in cart!`);
+        showNotification(`Updated ${product.name.slice(0, 20)}... quantity in cart!`);
         return prevItems.map((item) =>
-          item.product.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
+          item.product._id === product._id ? { ...item, quantity: item.quantity + quantity } : item
         );
       }
-      showNotification(`Added ${product.title.slice(0, 20)}... to cart!`);
+      showNotification(`Added ${product.name.slice(0, 20)}... to cart!`);
       return [...prevItems, { product, quantity }];
     });
   };
@@ -99,17 +114,17 @@ export default function App() {
       return;
     }
     setCartItems((prevItems) =>
-      prevItems.map((item) => (item.product.id === id ? { ...item, quantity } : item))
+      prevItems.map((item) => (item.product._id === id ? { ...item, quantity } : item))
     );
   };
 
   const handleRemoveCartItem = (id) => {
     setCartItems((prevItems) => {
-      const target = prevItems.find((item) => item.product.id === id);
+      const target = prevItems.find((item) => item.product._id === id);
       if (target) {
-        showNotification(`Removed ${target.product.title.slice(0, 20)}... from cart.`, "info");
+        showNotification(`Removed ${target.product.name.slice(0, 20)}... from cart.`, "info");
       }
-      return prevItems.filter((item) => item.product.id !== id);
+      return prevItems.filter((item) => item.product._id !== id);
     });
   };
 
@@ -142,29 +157,45 @@ export default function App() {
     showNotification("All filters reset.");
   };
 
-  const handleViewDetails = (id) => {
-    const prod = PRODUCTS.find((p) => p.id === id);
-    if (prod) {
-      setSelectedProduct(prod);
-      setView("product-detail");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
+ const handleViewDetails = (id) => {
+  console.log("Clicked:", id);
+
+  const prod = products.find((p) => p._id === id);
+
+  console.log("Found:", prod);
+
+  if (prod) {
+    setSelectedProduct(prod);
+    setView("product-detail");
+  }
+};
 
   // Filter products dynamically
-  const filteredProducts = PRODUCTS.filter((product) => {
-    const matchesCategory =
-      appliedFilters.category === "All Categories" || product.category === appliedFilters.category;
-    const matchesPrice = product.price <= appliedFilters.priceRange;
-    const matchesRating = product.rating >= appliedFilters.minRating;
-    const matchesSearch =
-      searchQuery.trim() === "" ||
-      product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.vendor.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredProducts = products.filter((product) => {
+  const matchesCategory =
+    appliedFilters.category === "All Categories" ||
+    product.category === appliedFilters.category;
 
-    return matchesCategory && matchesPrice && matchesRating && matchesSearch;
-  });
+  const matchesPrice =
+    product.price <= appliedFilters.priceRange;
+
+  // Backend doesn't return rating yet
+  const matchesRating =
+    (product.rating || 5) >= appliedFilters.minRating;
+
+  const matchesSearch =
+    searchQuery.trim() === "" ||
+    product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.brand?.toLowerCase().includes(searchQuery.toLowerCase());
+
+  return (
+    matchesCategory &&
+    matchesPrice &&
+    matchesRating &&
+    matchesSearch
+  );
+});
 
   // Sort products dynamically
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -186,17 +217,16 @@ export default function App() {
   // Authentication Success Callback
   const handleLoginSuccess = (user ) => {
     setLoggedInUser(user);
-    showNotification(`Welcome back, ${user.name.split(" ")[0]}!`);
+    setView("home");
   };
   //hnadle signup
   const handleSignupSuccess = (user) => {
   setLoggedInUser(user);
 
-  setIsSignupOpen(false);
+  setView("home");
 
   showNotification(
-    `Welcome ${user.firstName}! Account created successfully.`,
-    "success"
+    `Welcome ${user.firstName}!`
   );
 };
 
@@ -236,8 +266,7 @@ export default function App() {
         openCart={() => setIsCartOpen(true)}
         searchQuery={searchQuery.trim()}
         setSearchQuery={setSearchQuery}
-        isDarkMode={isDarkMode}
-        toggleDarkMode={toggleDarkMode}
+     
         onLoginClick={() => setView("login")}
         loggedInUser={loggedInUser}
         onLogout={handleLogout}
@@ -245,6 +274,9 @@ export default function App() {
 
       {/* Main Container */}
       <main className="flex-1 pb-16">
+        {currentView === "profile" && (
+           <Profile user={loggedInUser} />
+        )}
         {currentView === "home" && (
           <div className="flex flex-col gap-10">
             {/* Image Banner Carousel */}
@@ -383,7 +415,7 @@ export default function App() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         {paginatedProducts.map((product) => (
                           <ProductCard
-                            key={product.id}
+                            key={product._id}
                             product={product}
                             onViewDetails={handleViewDetails}
                             onAddToCart={(prod, e) => {
@@ -398,19 +430,19 @@ export default function App() {
                       <div className="flex flex-col gap-4">
                         {paginatedProducts.map((product) => (
                           <div
-                            key={product.id}
-                            onClick={() => handleViewDetails(product.id)}
+                            key={product._id}
+                            onClick={() => handleViewDetails(product._id)}
                             className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-4 flex gap-5 items-center cursor-pointer hover:shadow-lg hover:border-orange-200 transition-all shadow-sm"
                           >
                             <img
-                              src={product.images[0]}
-                              alt={product.title}
+                                src={product.thumbnail?.url || product.images?.[0]?.url}
+                                alt={product.name}
                               className="w-24 h-24 rounded-xl object-cover"
                               referrerPolicy="no-referrer"
                             />
                             <div className="flex-1 flex flex-col gap-1 pr-4">
-                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{product.vendor}</span>
-                              <h3 className="text-sm font-bold text-slate-800 dark:text-gray-100 line-clamp-1">{product.title}</h3>
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{product.brand}</span>
+                              <h3 className="text-sm font-bold text-slate-800 dark:text-gray-100 line-clamp-1">{product.name}</h3>
                               <p className="text-xs text-slate-400 dark:text-slate-500 line-clamp-2 leading-relaxed mt-0.5">{product.description}</p>
                               <div className="flex items-center gap-3 mt-1.5">
                                 <span className="text-base font-black text-slate-950 dark:text-white">₹{product.price}</span>
@@ -488,11 +520,11 @@ export default function App() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                {PRODUCTS.filter((p) => p.isNew)
+                {products.filter((p) => p.isNew)
                   .slice(0, 4)
                   .map((product) => (
                     <ProductCard
-                      key={product.id}
+                      key={product._id}
                       product={product}
                       onViewDetails={handleViewDetails}
                       onAddToCart={(prod, e) => {
@@ -626,7 +658,7 @@ export default function App() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                       {paginatedProducts.map((product) => (
                         <ProductCard
-                          key={product.id}
+                          key={product._id}
                           product={product}
                           onViewDetails={handleViewDetails}
                           onAddToCart={(prod, e) => {
@@ -640,13 +672,13 @@ export default function App() {
                     <div className="flex flex-col gap-4">
                       {paginatedProducts.map((product) => (
                         <div
-                          key={product.id}
+                          key={product._id}
                           onClick={() => handleViewDetails(product.id)}
                           className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-4 flex gap-5 items-center cursor-pointer hover:shadow-lg hover:border-orange-200 transition-all shadow-sm"
                         >
                           <img
-                            src={product.images[0]}
-                            alt={product.title}
+                            src={product.thumbnail?.url || product.images?.[0]?.url}
+                            alt={product.name}
                             className="w-24 h-24 rounded-xl object-cover"
                             referrerPolicy="no-referrer"
                           />
@@ -747,32 +779,32 @@ export default function App() {
       />
 
      {/* Login Page */}
-          {/* Login Page */}
-{currentView === "login" && (
-  <LoginPage
-    onLoginSuccess={(user) => {
-      handleLoginSuccess(user);
-      setView("home");
-    }}
-    onSwitchToSignup={() => {
-      setView("signup");
-    }}
-  />
-)}
 
-              {/* Signup Page */}
-              {currentView === "signup" && (
-                <SignupPage
-                  onSignupSuccess={(user) => {
-                    setLoggedInUser(user);
-                    showNotification("Account created successfully!");
-                    setView("home");
-                  }}
-                  onSwitchToLogin={() => {
-                    setView("login");
-                  }}
-                />
-              )}
+        {currentView === "login" && (
+          <LoginPage
+            onLoginSuccess={(user) => {
+              handleLoginSuccess(user);
+              setView("home");
+            }}
+            onSwitchToSignup={() => {
+              setView("signup");
+            }}
+          />
+        )}
+
+          {/* Signup Page */}
+          {currentView === "signup" && (
+            <SignupPage
+              onSignupSuccess={(user) => {
+                setLoggedInUser(user);
+                showNotification("Account created successfully!");
+                setView("home");
+              }}
+              onSwitchToLogin={() => {
+                setView("login");
+              }}
+            />
+          )}
                     {isSignupOpen && (
             <div className="fixed inset-0 z-50 bg-black/50 overflow-y-auto">
               <div className="min-h-screen flex items-center justify-center p-4">

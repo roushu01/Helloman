@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { signup } from "../api/authApi";
 import {
   Search,
   Moon,
@@ -27,10 +28,43 @@ export default function SignupPage({ onSignupSuccess, onSwitchToLogin }) {
   const update = (field) => (e) =>
     setForm((f) => ({ ...f, [field]: e.target.value }));
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (onSignupSuccess) onSignupSuccess(form);
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const payload = {
+    firstName: form.firstName,
+    lastName: form.lastName,
+    email: form.email,
+    password: form.password,
+
+    mobileNumber: form.mobile,
+
+    address: {
+      shippingAddress: form.shippingAddress,
+      country: form.country,
+      state: form.state,
+      cityId: form.cityId,
+      postalCode: form.postalCode,
+    },
   };
+
+  try {
+    const user = await signup(payload);
+
+    onSignupSuccess({
+      ...user,
+      name: `${payload.firstName} ${payload.lastName}`,
+    });
+
+  } catch (err) {
+    console.log(err);
+
+    alert(
+      err?.response?.data?.message ||
+      "Signup failed"
+    );
+  }
+};
 
   const inputClass =
     "w-full px-4 py-3 text-sm border border-gray-200 rounded-xl bg-white placeholder-gray-400 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500";
