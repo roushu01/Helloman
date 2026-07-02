@@ -28,6 +28,7 @@ export default function Header({
     setView("products");
     setShowCategoriesDropdown(false);
   };
+ 
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -192,18 +193,7 @@ export default function Header({
           {/* Desktop Control Panel */}
           
 
-            {/* Shopping Cart */}
-            <button
-              onClick={openCart}
-              className="relative text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-            >
-              <ShoppingCart className="w-5 h-5" />
-              {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-orange-500 text-white text-[10px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center animate-pulse">
-                  {cartCount}
-                </span>
-              )}
-            </button>
+            
 
             {/* Login button / User dropdown */}
             {loggedInUser ? (

@@ -13,6 +13,7 @@ import SellerRegister from "./components/SellerRegister";
 import { PRODUCTS } from "./data";
 import SignupPage from "./components/SignupModel";
 import Profile from "./components/ProfileView";
+import { addToCart,getCart, updateCart,deleteCartItem} from "./api/cartApi";
 
 import { getProducts } from "./api/ProductApi";
 
@@ -29,11 +30,11 @@ export default function App() {
 
   // Filter State
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
-  const [priceRange, setPriceRange] = useState(10000);
+  const [priceRange, setPriceRange] = useState(1000000);
   const [minRating, setMinRating] = useState(0);
   const [appliedFilters, setAppliedFilters] = useState({
     category: "All Categories",
-    priceRange: 10000,
+    priceRange: 1000000,
     minRating: 0
   });
 
@@ -65,21 +66,21 @@ export default function App() {
   fetchProducts();
       }, []);
 
-      const fetchProducts = async () => {
-        try {
-          const res = await getProducts();
+  const fetchProducts = async () => {
+    try {
+      const res = await getProducts();
 
-          console.log(res);
+      console.log(res);
 
-          if (res.success) {
-            setProducts(res.products);
-          }
-        } catch (err) {
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-      };
+      if (res.success) {
+        setProducts(res.products);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Dynamic system-level notifications
   const [notification, setNotification] = useState(null);
@@ -94,43 +95,94 @@ export default function App() {
   };
 
   // Cart operations
-  const handleAddToCart = (product, quantity = 1) => {
-    setCartItems((prevItems) => {
-      const existing = prevItems.find((item) => item.product._id === product._id);
-      if (existing) {
-        showNotification(`Updated ${product.name.slice(0, 20)}... quantity in cart!`);
-        return prevItems.map((item) =>
-          item.product._id === product._id ? { ...item, quantity: item.quantity + quantity } : item
-        );
-      }
-      showNotification(`Added ${product.name.slice(0, 20)}... to cart!`);
-      return [...prevItems, { product, quantity }];
-    });
-  };
+  const handleAddToCart = async (product, quantity = 1) => {
+  try {
+    const response = await addToCart(product._id, quantity);
+    setNotification("Product added to cart Success")
+    
 
-  const handleUpdateCartQuantity = (id, quantity) => {
+    console.log("Add to cart response:", response);
+
+    // Update cart here
+    // await fetchCart();
+
+  } catch (error) {
+    console.error(error.response?.data || error);
+  }
+};
+const fetchCart = async () => {
+  try {
+    console.log("fetchCart called");
+
+    const res = await getCart();
+
+    console.log("Cart API Response:", res);
+
+    if (res.success) {
+      setCartItems(res.items);   // ✅ FIX
+    }
+  } catch (err) {
+    console.error("Fetch cart error:", err);
+  }
+};
+  const handleUpdateCartQuantity = async (id, quantity) => {
+  try {
     if (quantity <= 0) {
-      handleRemoveCartItem(id);
+      await handleRemoveCartItem(id);
       return;
     }
-    setCartItems((prevItems) =>
-      prevItems.map((item) => (item.product._id === id ? { ...item, quantity } : item))
-    );
-  };
 
-  const handleRemoveCartItem = (id) => {
-    setCartItems((prevItems) => {
-      const target = prevItems.find((item) => item.product._id === id);
+    const res = await updateCart(id, quantity);
+
+    if (res.success) {
+      await fetchCart(); // Refresh cart from backend
+    } else {
+      showNotification("Failed to update cart", "error");
+    }
+  } catch (err) {
+    console.error(err);
+    showNotification("Failed to update cart", "error");
+  }
+};
+  
+
+  const handleRemoveCartItem = async (id) => {
+  try {
+    const target = cartItems.find((item) => item.product._id === id);
+
+    const res = await deleteCartItem(id);
+
+    if (res.success) {
       if (target) {
-        showNotification(`Removed ${target.product.name.slice(0, 20)}... from cart.`, "info");
+        showNotification(
+          `Removed ${target.product.name.slice(0, 20)}... from cart.`,
+          "info"
+        );
       }
-      return prevItems.filter((item) => item.product._id !== id);
-    });
-  };
+
+      await fetchCart(); // Refresh cart from backend
+    } else {
+      showNotification("Failed to remove item", "error");
+    }
+  } catch (err) {
+    console.error(err);
+    showNotification("Failed to remove item", "error");
+  }
+};
 
   const handleClearCart = () => {
     setCartItems([]);
   };
+   const handleOpenCart = async () => {
+     console.log("Cart button clicked");
+          if (!loggedInUser) {
+            setView("login");
+            return;
+          }
+
+          await fetchCart();
+          setIsCartOpen(true);
+};
 
   // Filtering actions
   const handleApplyFilters = () => {
@@ -146,11 +198,11 @@ export default function App() {
 
   const handleClearFilters = () => {
     setSelectedCategory("All Categories");
-    setPriceRange(10000);
+    setPriceRange(1000000);
     setMinRating(0);
     setAppliedFilters({
       category: "All Categories",
-      priceRange: 10000,
+      priceRange: 1000000,
       minRating: 0
     });
     setCurrentPage(1);
@@ -169,25 +221,40 @@ export default function App() {
     setView("product-detail");
   }
 };
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  const user = localStorage.getItem("user");
 
+  if (token && user) {
+    setLoggedInUser(JSON.parse(user));
+  }
+}, []);
   // Filter products dynamically
-  const filteredProducts = products.filter((product) => {
+const filteredProducts = products.filter((product) => {
+  console.log("Filtering product:")
+ 
   const matchesCategory =
     appliedFilters.category === "All Categories" ||
     product.category === appliedFilters.category;
 
-  const matchesPrice =
-    product.price <= appliedFilters.priceRange;
+ const matchesPrice =
+  (product.discountPrice || product.price) <= appliedFilters.priceRange;
 
-  // Backend doesn't return rating yet
   const matchesRating =
-    (product.rating || 5) >= appliedFilters.minRating;
+    (product.rating || 0) >= appliedFilters.minRating;
 
   const matchesSearch =
     searchQuery.trim() === "" ||
     product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     product.brand?.toLowerCase().includes(searchQuery.toLowerCase());
+
+  console.log(product.name, {
+    matchesCategory,
+    matchesPrice,
+    matchesRating,
+    matchesSearch,
+  });
 
   return (
     matchesCategory &&
@@ -196,6 +263,8 @@ export default function App() {
     matchesSearch
   );
 });
+console.log("Filtered Products:", filteredProducts.length);
+console.log(filteredProducts);
 
   // Sort products dynamically
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -215,13 +284,15 @@ export default function App() {
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   // Authentication Success Callback
-  const handleLoginSuccess = (user ) => {
+  const handleLoginSuccess = async(user ) => {
     setLoggedInUser(user);
+    await fetchCart();
     setView("home");
   };
   //hnadle signup
-  const handleSignupSuccess = (user) => {
+  const handleSignupSuccess = async(user) => {
   setLoggedInUser(user);
+  await fetchCart();
 
   setView("home");
 
@@ -231,9 +302,13 @@ export default function App() {
 };
 
   const handleLogout = () => {
-    setLoggedInUser(null);
-    showNotification("Logged out successfully.", "info");
-  };
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+
+  setLoggedInUser(null);
+  setCartItems([]);
+  setView("home");
+};
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-950 transition-colors duration-200">
@@ -263,7 +338,7 @@ export default function App() {
           setAppliedFilters((prev) => ({ ...prev, category: cat }));
         }}
         cartCount={cartCount}
-        openCart={() => setIsCartOpen(true)}
+        openCart={handleOpenCart}
         searchQuery={searchQuery.trim()}
         setSearchQuery={setSearchQuery}
      
@@ -285,7 +360,7 @@ export default function App() {
                 setSelectedCategory(cat);
                 setAppliedFilters({
                   category: cat,
-                  priceRange: 10000,
+                  priceRange: 1000000,
                   minRating: 0
                 });
                 setView("products");
@@ -418,9 +493,9 @@ export default function App() {
                             key={product._id}
                             product={product}
                             onViewDetails={handleViewDetails}
-                            onAddToCart={(prod, e) => {
+                            onAddToCart={(product, e) => {
                               e.stopPropagation();
-                              handleAddToCart(prod, 1);
+                              handleAddToCart(product, 1);
                             }}
                           />
                         ))}
@@ -509,7 +584,7 @@ export default function App() {
                 </div>
                 <button
                   onClick={() => {
-                    setAppliedFilters({ category: "All Categories", priceRange: 10000, minRating: 0 });
+                    setAppliedFilters({ category: "All Categories", priceRange: 1000000, minRating: 0 });
                     setView("products");
                   }}
                   className="text-xs font-bold text-blue-600 hover:text-orange-500 flex items-center gap-1 cursor-pointer transition-colors"
@@ -520,19 +595,29 @@ export default function App() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                {products.filter((p) => p.isNew)
-                  .slice(0, 4)
-                  .map((product) => (
-                    <ProductCard
-                      key={product._id}
-                      product={product}
-                      onViewDetails={handleViewDetails}
-                      onAddToCart={(prod, e) => {
-                        e.stopPropagation();
-                        handleAddToCart(prod, 1);
-                      }}
-                    />
-                  ))}
+               {products
+              .filter((product) => {
+                const createdDate = new Date(product.createdAt);
+                const today = new Date();
+
+                // Difference in days
+                const diffInDays =
+                  (today - createdDate) / (1000 * 60 * 60 * 24);
+
+                return diffInDays <= 2; // Products added in the last 2 days
+              })
+              .slice(0, 4)
+              .map((product) => (
+                <ProductCard
+                  key={product._id}
+                  product={product}
+                  onViewDetails={handleViewDetails}
+                  onAddToCart={(product, e) => {
+                    e.stopPropagation();
+                    handleAddToCart(product, 1);
+                  }}
+                />
+            ))}
               </div>
             </div>
           </div>
@@ -661,9 +746,9 @@ export default function App() {
                           key={product._id}
                           product={product}
                           onViewDetails={handleViewDetails}
-                          onAddToCart={(prod, e) => {
+                          onAddToCart={(product, e) => {
                             e.stopPropagation();
-                            handleAddToCart(prod, 1);
+                            handleAddToCart(product, 1);
                           }}
                         />
                       ))}
@@ -673,7 +758,7 @@ export default function App() {
                       {paginatedProducts.map((product) => (
                         <div
                           key={product._id}
-                          onClick={() => handleViewDetails(product.id)}
+                          onClick={() => handleViewDetails(product._id)}
                           className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-4 flex gap-5 items-center cursor-pointer hover:shadow-lg hover:border-orange-200 transition-all shadow-sm"
                         >
                           <img
@@ -750,11 +835,8 @@ export default function App() {
               setView("home");
               setSelectedProduct(null);
             }}
-            onAddToCart={(prod, quantity) => handleAddToCart(prod, quantity)}
-            onBuyNow={(prod, quantity) => {
-              handleAddToCart(prod, quantity);
-              setIsCartOpen(true);
-            }}
+            onAddToCart={(product, quantity) => handleAddToCart(product, quantity)}
+            
           />
         )}
 

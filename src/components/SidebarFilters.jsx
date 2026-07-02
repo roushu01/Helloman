@@ -70,7 +70,7 @@ export default function SidebarFilters({
           <input
             type="range"
             min="0"
-            max="10000"
+            max="1000000"
             step="100"
             value={priceRange}
             onChange={(e) => setPriceRange(Number(e.target.value))}
@@ -79,7 +79,7 @@ export default function SidebarFilters({
           <div className="flex justify-between text-xs font-semibold text-slate-400 dark:text-slate-500">
             <span>₹0</span>
             <span>₹5,000</span>
-            <span>₹10,000</span>
+            <span>₹10,00000</span>
           </div>
         </div>
       </div>

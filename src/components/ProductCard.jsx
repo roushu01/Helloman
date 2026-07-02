@@ -32,13 +32,7 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
           >
             <Eye className="w-5 h-5" />
           </button>
-          <button
-            onClick={(e) => onAddToCart(product, e)}
-            className="p-2.5 bg-white text-slate-800 rounded-full shadow-lg hover:bg-orange-500 hover:text-white transition-all transform hover:scale-110"
-            title="Add to Cart"
-          >
-            <ShoppingCart className="w-5 h-5" />
-          </button>
+        
         </div>
 
         <img

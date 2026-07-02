@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import {login} from "../api/authApi";
 import {
   Mail,
   Lock,
@@ -16,13 +17,45 @@ export default function LoginPage({ onLoginSuccess, onSwitchToSignup }) {
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+ const [loading, setLoading] = useState(false);
+const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (onLoginSuccess) {
-      onLoginSuccess({ email, password, remember });
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    setLoading(true);
+    setError("");
+
+    const res = await login({
+      email,
+      password,
+    });
+
+    console.log(res);
+
+    if (res.success) {
+      // Save JWT if your backend returns one
+      if (res.token) {
+        localStorage.setItem("token", res.token);
+      }
+
+      // Save user if needed
+      if (res.user) {
+        localStorage.setItem("user", JSON.stringify(res.user));
+      }
+
+      // Notify App.jsx
+      onLoginSuccess(res.user);
+    } else {
+      setError(res.message || "Login failed");
     }
-  };
+  } catch (err) {
+    setError(err.response?.data?.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div>
