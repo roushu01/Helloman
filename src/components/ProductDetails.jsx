@@ -85,7 +85,7 @@ const handleCheckoutSubmit = async (e) => {
         {/* Images Columns */}
         <div className="flex flex-col gap-4">
           {/* Main Large Image */}
-          <div className="w-full aspect-[4/3] bg-gray-50 dark:bg-slate-800 rounded-2xl overflow-hidden border border-gray-150 dark:border-slate-800 shadow-sm relative">
+          <div className="w-full aspect-[4/3] bg-gray-50 dark:bg-slate-800 rounded-2xl overflow-hidden  shadow-sm relative">
             <img
               src={product.images?.[activeImageIndex]?.url}
               alt={product.name}
@@ -137,22 +137,18 @@ const handleCheckoutSubmit = async (e) => {
                 <Star
                   key={i}
                   className={`w-4 h-4 ${
-                    i < Math.floor(product.rating || 0) ? "fill-current text-yellow-400" : "text-gray-200 dark:text-slate-700"
+                    i < Math.floor(product.rating || 4) ? "fill-current text-yellow-400" : "text-gray-200 dark:text-slate-700"
                   }`}
                 />
               ))}
             </div>
-            <span className="text-sm font-bold text-slate-600 dark:text-slate-300">
-              {/* {product.rating.toFixed(1)} <span className="text-slate-400 dark:text-slate-500 font-normal">({product.reviewsCount} reviews)</span> */}
-            </span>
+         
           </div>
 
           {/* Price Tag */}
-          <div className="flex flex-col gap-1.5">
-             <span className="text-3xl font-bold text-red-500">
-                ₹{product.discountPrice}
-            </span>
-            <span className="text-3xl line-through font-black text-slate-500 dark:text-white">
+          <div className="flex -px-4 flex-col ">
+          
+            <span className="text-3xl  font-black text-red-500 dark:text-white">
               ₹{product.price}
             </span>
             <span className="text-sm font-bold text-green-600 dark:text-green-400 flex items-center gap-1.5">
@@ -401,7 +397,7 @@ const handleCheckoutSubmit = async (e) => {
       {/* Bottom Content Area matching screenshots */}
       <div className="flex flex-col gap-8 mt-4" id="details-bottom-rich-content">
         {/* Product Description Section */}
-        <div className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-4">
           <h2 className="text-lg font-black text-slate-900 dark:text-white border-b border-gray-100 dark:border-slate-800 pb-3">
             Product Description
           </h2>
@@ -412,9 +408,9 @@ const handleCheckoutSubmit = async (e) => {
 
         {/* Product Details Specs Table */}
         {product.specifications && Object.keys(product.specifications).length > 0 && (
-          <div className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-4">
             <h2 className="text-lg font-black text-slate-900 dark:text-white border-b border-gray-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-              <span>📋</span> Product Details:
+              <span></span> Product Details:
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm border-collapse">
@@ -439,9 +435,9 @@ const handleCheckoutSubmit = async (e) => {
 
         {/* Key Features Bullet List */}
         {product.keyFeatures && product.keyFeatures.length > 0 && (
-          <div className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-4">
             <h2 className="text-lg font-black text-slate-900 dark:text-white border-b border-gray-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-              <span>💎</span> Key Features:
+              <span></span> Key Features:
             </h2>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-600 dark:text-slate-300 font-medium">
               {product.keyFeatures.map((feature, i) => (
@@ -456,9 +452,9 @@ const handleCheckoutSubmit = async (e) => {
 
         {/* Style Tip */}
         {product.styleTip && (
-          <div className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-4">
+          <div className="bg-white dark:bg-slate-900rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-4">
             <h2 className="text-lg font-black text-slate-900 dark:text-white border-b border-gray-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-              <span>💃</span> Style Tip:
+              <span></span> Style Tip:
             </h2>
             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
               {product.styleTip}
@@ -468,9 +464,9 @@ const handleCheckoutSubmit = async (e) => {
 
         {/* Package Includes */}
         {product.packageIncludes && (
-          <div className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-4">
             <h2 className="text-lg font-black text-slate-900 dark:text-white border-b border-gray-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-              <span>📦</span> Package Includes:
+              <span></span> Package Includes:
             </h2>
             <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">
               {product.packageIncludes}
@@ -480,9 +476,9 @@ const handleCheckoutSubmit = async (e) => {
 
         {/* Ideal For */}
         {product.idealFor && (
-          <div className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col gap-4">
             <h2 className="text-lg font-black text-slate-900 dark:text-white border-b border-gray-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-              <span>🧵</span> Ideal For:
+              <span></span> Ideal For:
             </h2>
             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
               {product.idealFor}

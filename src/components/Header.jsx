@@ -41,9 +41,9 @@ export default function Header({
     <header className="w-full z-50 shadow-sm sticky top-0" id="hellomem-header">
       {/* Top Bar Banner */}
       <div className="bg-[#0b1528] text-gray-300 text-xs py-2 px-4 md:px-8 flex justify-between items-center" id="top-bar-announcement">
-        <div className="font-medium tracking-wide">
-          Jaipur Leading Online Shopping Destination
-        </div>
+      <div className="font-medium tracking-wide">
+        Jaipur Leading Online Shopping Destination
+      </div>
         <div className="flex gap-4 md:gap-6 items-center">
           <button
             onClick={() => setView("about")}
@@ -68,13 +68,13 @@ export default function Header({
       </div>
 
       {/* Main Navigation Row */}
-      <div className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 transition-colors py-3.5 px-2 md:px-8 flex flex-col md:flex-row gap-4 items-center justify-between" id="navbar-main">
+      <div className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 transition-colors py-3.5 px-2 md:px-8 flex flex-col md:flex-row gap-12 items-center justify-between" id="navbar-main">
         {/* Logo and Quick Links */}
-        <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-start">
+       <div className="flex flex-wrap items-center justify-between w-full gap-3">
           {/* Logo */}
           <div
             onClick={() => { setView("home"); setSelectedCategory("All Categories"); setSearchQuery(""); }}
-            className="flex items-center gap-2 cursor-pointer group"
+            className="flex items-center px-30 gap-2 cursor-pointer group"
             id="brand-logo"
           >
             <div className="bg-orange-500 text-white p-1.5 rounded-lg shadow-sm group-hover:scale-105 transition-transform duration-250">
@@ -87,7 +87,7 @@ export default function Header({
           </div>
 
           {/* Nav Links */}
-          <nav className="hidden lg:flex items-center gap-6 text-sm font-semibold text-slate-600 dark:text-slate-300" id="navigation-desktop">
+          <nav className="hidden lg:flex items-center  -ml-10 gap-8 text-lg font-semibold text-slate-600 dark:text-slate-300" id="navigation-desktop">
             <button
               onClick={() => { setView("home"); setSelectedCategory("All Categories"); }}
               className={`hover:text-orange-500 cursor-pointer transition-colors ${currentView === "home" ? "text-orange-500" : ""}`}
@@ -114,7 +114,7 @@ export default function Header({
               {showCategoriesDropdown && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setShowCategoriesDropdown(false)} />
-                  <div className="absolute left-0 mt-2 w-56 max-h-80 overflow-y-auto bg-white dark:bg-slate-800 border border-gray-150 dark:border-slate-700 rounded-xl shadow-xl z-20 py-2 scrollbar-thin">
+                  <div className="absolute left-0 mt-2 w-56 max-h-80 overflow-y-auto bg-white dark:bg-slate-800  rounded-xl shadow-xl z-20 py-2 scrollbar-thin">
                     {CATEGORIES.map((cat) => (
                       <button
                         key={cat}
@@ -172,10 +172,10 @@ export default function Header({
             </button>
           </div>
 
-        </div>
+        {/* </div> */}
 
         {/* Search, DarkMode, Cart & Auth Controls */}
-        <div className="flex items-center gap-4 w-full md:w-auto" id="nav-search-controls">
+        {/* <div className="flex items-center -ml-100f w-full md:w-auto" id="nav-search-controls"> */}
           {/* Search Box */}
           <div className="relative flex-1 md:w-64 lg:w-80" id="search-input-container">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
@@ -190,28 +190,38 @@ export default function Header({
             />
           </div>
 
-          {/* Desktop Control Panel */}
-          
+         <div className="flex items-center gap-4">
+  {/* Desktop Cart */}
+  <button
+    onClick={openCart}
+    className="hidden lg:flex relative items-center justify-center p-2 rounded-full hover:bg-orange-100"
+  >
+    <ShoppingCart className="w-6 h-6" />
 
-            
+    {cartCount > 0 && (
+      <span className="absolute -top-1 -right-1 bg-orange-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">
+        {cartCount}
+      </span>
+    )}
+  </button>
 
-            {/* Login button / User dropdown */}
-            {loggedInUser ? (
-                <button
-                  onClick={() => setView("profile")}
-                  className="p-2 rounded-full hover:bg-orange-100 transition-colors"
-                  title="My Profile"
-                >
-                  <User className="w-6 h-6 text-orange-600" />
-                </button>
-              ) : (
-              <button
-                onClick={onLoginClick}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2 rounded-lg"
-              >
-                Login
-              </button>
-            )}
+  {/* Login/Profile */}
+  {loggedInUser ? (
+    <button
+      onClick={() => setView("profile")}
+      className="p-2 rounded-full hover:bg-orange-100"
+    >
+      <User className="w-6 h-6 text-orange-600" />
+    </button>
+  ) : (
+    <button
+      onClick={onLoginClick}
+      className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2 rounded-lg"
+    >
+      Login
+    </button>
+  )}
+</div>
 
           </div>
         </div>

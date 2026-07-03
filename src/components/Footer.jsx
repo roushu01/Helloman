@@ -53,15 +53,15 @@ export default function Footer({ setView, setSelectedCategory }) {
           {/* Contact details */}
           <div className="flex flex-col gap-3 text-sm mt-2" id="footer-contact-details">
             <a href="mailto:info@hellomem.com" className="flex items-center gap-2.5 hover:text-orange-400 transition-colors">
-              <Mail className="w-4.5 h-4.5 text-orange-500 shrink-0" />
+              <Mail className="w-4.5 h-4.5 text-blue-500 shrink-0" />
               <span>info@hellomem.com</span>
             </a>
             <a href="tel:+919829381718" className="flex items-center gap-2.5 hover:text-orange-400 transition-colors">
-              <Phone className="w-4.5 h-4.5 text-orange-500 shrink-0" />
+              <Phone className="w-4.5 h-4.5 text-blue-500 shrink-0" />
               <span>+91 9829381718</span>
             </a>
             <div className="flex items-start gap-2.5 text-gray-400">
-              <MapPin className="w-4.5 h-4.5 text-orange-500 shrink-0 mt-0.5" />
+              <MapPin className="w-4.5 h-4.5 text-blue-500 shrink-0 mt-0.5" />
               <span>Jaipur, Rajasthan 302015</span>
             </div>
           </div>

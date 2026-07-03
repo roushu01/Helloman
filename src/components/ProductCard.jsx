@@ -8,11 +8,11 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
   return (
     <div
       onClick={() => onViewDetails(product._id)}
-      className="group bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:border-orange-200 dark:hover:border-orange-950/30 transition-all duration-300 flex flex-col h-full cursor-pointer relative"
+      className="group bg-white dark:bg-slate-900  rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:border-orange-200 dark:hover:border-orange-950/30 transition-all duration-300 flex flex-col h-full cursor-pointer relative"
       id={`product-card-${product._id}`}
     >
       {/* Product Image Area */}
-      <div className="relative w-full aspect-square bg-gray-50 overflow-hidden shrink-0">
+      <div className="relative w-full h-55 aspect-square bg-gray-50 overflow-hidden shrink-0">
         {/* "New" Badge */}
         {product.isNew && (
           <span className="absolute top-3.5 left-3.5 bg-green-500 text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full z-10 shadow-sm">

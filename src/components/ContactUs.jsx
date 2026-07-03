@@ -31,14 +31,14 @@ export default function ContactUs() {
         {/* Contact Info: 5 Cols */}
         <div className="lg:col-span-5 flex flex-col gap-6">
           {/* Card 1: Main coordinates */}
-          <div className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col gap-5">
+          <div className="bg-white dark:bg-slate-900  rounded-2xl p-6 shadow-sm flex flex-col gap-5">
             <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider border-b border-gray-100 dark:border-slate-800 pb-3">
               Office Details
             </h3>
 
             <div className="flex flex-col gap-4">
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-950/20 text-orange-500 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-950/20 text-gray-500 flex items-center justify-center shrink-0">
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
@@ -50,7 +50,7 @@ export default function ContactUs() {
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/20 text-blue-500 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-950/20 text-gray-500 flex items-center justify-center shrink-0">
                   <Phone className="w-5 h-5" />
                 </div>
                 <div>
@@ -62,7 +62,7 @@ export default function ContactUs() {
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-950/20 text-green-500 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-950/20 text-gray-500 flex items-center justify-center shrink-0">
                   <Mail className="w-5 h-5" />
                 </div>
                 <div>
@@ -75,23 +75,12 @@ export default function ContactUs() {
             </div>
           </div>
 
-          {/* Card 2: Office timing */}
-          <div className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <Clock className="w-5 h-5 text-orange-500" />
-              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                Support Hours
-              </h3>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Our support team is active from <strong className="text-slate-700 dark:text-slate-300">09:00 AM to 08:00 PM IST</strong>, Monday through Saturday. Drop us a message, or call us for real-time tracking!
-            </p>
-          </div>
+     
         </div>
 
         {/* Contact Form: 7 Cols */}
         <div className="lg:col-span-7">
-          <div className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-sm">
+          <div className="bg-white dark:bg-slate-900  rounded-2xl p-6 md:p-8 shadow-sm">
             {isSent ? (
               <div className="flex flex-col items-center justify-center text-center py-12 gap-4">
                 <div className="w-14 h-14 rounded-full bg-green-50 dark:bg-green-950/30 text-green-500 flex items-center justify-center">

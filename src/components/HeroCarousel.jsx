@@ -30,7 +30,7 @@ export default function HeroCarousel() {
   };
 
   return (
-    <section className="relative w-full h-[320px] sm:h-[450px] md:h-[520px] overflow-hidden">
+    <section className="relative p-2 py-2 w-full h-[420px] sm:h-[450px] md:h-[520px] overflow-hidden">
 
       {/* Images */}
       <div className="relative w-full h-full">
@@ -48,21 +48,7 @@ export default function HeroCarousel() {
         ))}
       </div>
 
-      {/* Left */}
-      <button
-        onClick={handlePrev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-black/30 text-white p-3 rounded-full"
-      >
-        <ChevronLeft />
-      </button>
 
-      {/* Right */}
-      <button
-        onClick={handleNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-black/30 text-white p-3 rounded-full"
-      >
-        <ChevronRight />
-      </button>
 
       {/* Dots */}
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2 z-10">
@@ -72,7 +58,7 @@ export default function HeroCarousel() {
             onClick={() => setCurrentIndex(index)}
             className={`rounded-full transition-all ${
               index === currentIndex
-                ? "w-3 h-3 bg-orange-500"
+                ? "w-3 h-3 bg-purple-500"
                 : "w-3 h-3 bg-white/60"
             }`}
           />
