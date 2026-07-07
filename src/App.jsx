@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import HeroCarousel from "./components/HeroCarousel";
@@ -230,8 +230,9 @@ useEffect(() => {
   }
 }, []);
   // Filter products dynamically
-const filteredProducts = products.filter((product) => {
-  console.log("Filtering product:")
+const filteredProducts = useMemo(() => {
+  return products.filter((product) => {
+    console.log("Filtering product:")
  
   const matchesCategory =
     appliedFilters.category === "All Categories" ||
@@ -263,6 +264,7 @@ const filteredProducts = products.filter((product) => {
     matchesSearch
   );
 });
+}, [products, appliedFilters, searchQuery]);
 console.log("Filtered Products:", filteredProducts.length);
 console.log(filteredProducts);
 
