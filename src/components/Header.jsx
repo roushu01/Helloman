@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { Search, Moon, Sun, ShoppingCart, Menu, X, User, ChevronDown, ShoppingBag } from "lucide-react";
 import { CATEGORIES } from "../data";
 
-
-
 export default function Header({
   currentView,
   setView,
@@ -17,10 +15,8 @@ export default function Header({
   onLoginClick,
   loggedInUser,
   onLogout,
-
 }) {
   const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false);
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleCategoryClick = (category) => {
@@ -28,7 +24,6 @@ export default function Header({
     setView("products");
     setShowCategoriesDropdown(false);
   };
- 
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -37,84 +32,111 @@ export default function Header({
     }
   };
 
+  const navLinkClass = (view) =>
+    `hover:text-orange-500 cursor-pointer transition-colors ${
+      currentView === view ? "text-orange-500" : ""
+    }`;
+
   return (
     <header className="w-full z-50 shadow-sm sticky top-0" id="hellomem-header">
       {/* Top Bar Banner */}
-      <div className="bg-[#0b1528] text-gray-300 text-xs py-2 px-4 md:px-8 flex justify-between items-center" id="top-bar-announcement">
-      <div className="font-medium tracking-wide">
-        Jaipur Leading Online Shopping Destination
-      </div>
-        <div className="flex gap-4 md:gap-6 items-center">
+      <div className="bg-[#0b1528] text-gray-300 text-xs py-2 px-4 md:px-8">
+       <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="text-[11px] font-medium ml-77" >
+          Jaipur Leading Online Shopping Destination
+        </div>
+        <div className="flex ml-78 gap-4 md:gap-2 items-center shrink-0">
           <button
             onClick={() => setView("about")}
-            className="hover:text-white transition-colors cursor-pointer"
+            className="hover:text-white transition-colors cursor-pointer hidden sm:inline"
           >
             About Us
           </button>
           <button
             onClick={() => setView("seller")}
-            className="hover:text-white transition-colors cursor-pointer"
+            className="hover:text-white transition-colors cursor-pointer hidden sm:inline"
           >
             Register/Login as Seller
           </button>
           <a
             href="#download-app"
-            onClick={(e) => { e.preventDefault(); alert("Mobile App downloading started! (Simulated)"); }}
+            onClick={(e) => {
+              e.preventDefault();
+              alert("Mobile App downloading started! (Simulated)");
+            }}
             className="hover:text-white transition-colors hidden sm:inline"
           >
             Download App
           </a>
         </div>
       </div>
+      </div>
 
       {/* Main Navigation Row */}
-      <div className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 transition-colors py-3.5 px-2 md:px-8 flex flex-col md:flex-row gap-12 items-center justify-between" id="navbar-main">
-        {/* Logo and Quick Links */}
-       <div className="flex flex-wrap items-center justify-between w-full gap-3">
+      <div
+        className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 transition-colors py-3.5 "
+        id="navbar-main"
+      >
+        <div className="flex items-center justify-between flex-wrap md:flex-nowrap">
+        
+
+          {/* Desktop Nav Links */}
+          <nav
+            className="hidden lg:flex items-center gap-5 text-sm font-medium  text-slate-600 dark:text-slate-300 ml-2 md:ml-4"
+        
+          >
+        
           {/* Logo */}
           <div
-            onClick={() => { setView("home"); setSelectedCategory("All Categories"); setSearchQuery(""); }}
-            className="flex items-center px-30 gap-2 cursor-pointer group"
+            onClick={() => {
+              setView("home");
+              setSelectedCategory("All Categories");
+              setSearchQuery("");
+            }}
+            className="flex items-center gap-2 ml-70 cursor-pointer group shrink-0"
             id="brand-logo"
           >
             <div className="bg-orange-500 text-white p-1.5 rounded-lg shadow-sm group-hover:scale-105 transition-transform duration-250">
               <ShoppingBag className="w-6 h-6" />
             </div>
             <div className="flex items-baseline">
-              <span className="text-2xl font-black tracking-tight text-orange-500">Hello</span>
-              <span className="text-2xl font-black tracking-tight text-slate-800 dark:text-white ml-0.5">Mem</span>
+              <span className="text-xl font-bold tracking-tight text-orange-500">Hello</span>
+              <span className="text-xl font-bold tracking-tight text-slate-800 dark:text-white ml-0.5">
+                Mem
+              </span>
             </div>
           </div>
-
-          {/* Nav Links */}
-          <nav className="hidden lg:flex items-center  -ml-10 gap-8 text-lg font-semibold text-slate-600 dark:text-slate-300" id="navigation-desktop">
             <button
-              onClick={() => { setView("home"); setSelectedCategory("All Categories"); }}
-              className={`hover:text-orange-500 cursor-pointer transition-colors ${currentView === "home" ? "text-orange-500" : ""}`}
+              onClick={() => {
+                setView("home");
+                setSelectedCategory("All Categories");
+              }}
+              className={navLinkClass("home")}
             >
               Home
             </button>
-            <button
-              onClick={() => { setView("products"); }}
-              className={`hover:text-orange-500 cursor-pointer transition-colors ${currentView === "products" ? "text-orange-500" : ""}`}
-            >
+            <button onClick={() => setView("products")} className={navLinkClass("products")}>
               Products
             </button>
 
-            {/* Categories Dropdown Trigger */}
+            {/* Categories Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setShowCategoriesDropdown(!showCategoriesDropdown)}
                 className="hover:text-orange-500 cursor-pointer transition-colors flex items-center gap-1 py-1"
               >
                 Categories
-                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showCategoriesDropdown ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    showCategoriesDropdown ? "rotate-180" : ""
+                  }`}
+                />
               </button>
 
               {showCategoriesDropdown && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setShowCategoriesDropdown(false)} />
-                  <div className="absolute left-0 mt-2 w-56 max-h-80 overflow-y-auto bg-white dark:bg-slate-800  rounded-xl shadow-xl z-20 py-2 scrollbar-thin">
+                  <div className="absolute left-0 mt-2 w-56 max-h-80 overflow-y-auto bg-white dark:bg-slate-800 rounded-xl shadow-xl z-20 py-2 scrollbar-thin">
                     {CATEGORIES.map((cat) => (
                       <button
                         key={cat}
@@ -129,55 +151,14 @@ export default function Header({
               )}
             </div>
 
-            <button
-              onClick={() => setView("about")}
-              className={`hover:text-orange-500 cursor-pointer transition-colors ${currentView === "about" ? "text-orange-500" : ""}`}
-            >
+            <button onClick={() => setView("about")} className={navLinkClass("about")}>
               About
             </button>
-            <button
-              onClick={() => setView("contact")}
-              className={`hover:text-orange-500 cursor-pointer transition-colors ${currentView === "contact" ? "text-orange-500" : ""}`}
-            >
+            <button onClick={() => setView("contact")} className={navLinkClass("contact")}>
               Contact
             </button>
-          </nav>
-
-          {/* Mobile Cart Trigger on right for easy access */}
-          <div className="flex items-center gap-3">
-
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-md hover:bg-gray-100"
-            >
-              {mobileMenuOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
-              )}
-            </button>
-
-            
-            <button
-              onClick={openCart}
-              className="lg:hidden relative"
-            >
-              <ShoppingCart className="w-5 h-5" />
-
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-orange-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">
-                  {cartCount}
-                </span>
-              )}
-            </button>
-          </div>
-
-        {/* </div> */}
-
-        {/* Search, DarkMode, Cart & Auth Controls */}
-        {/* <div className="flex items-center -ml-100f w-full md:w-auto" id="nav-search-controls"> */}
-          {/* Search Box */}
-          <div className="relative flex-1 md:w-64 lg:w-80" id="search-input-container">
+            <div className="relative px-10 w-100">
+            <div className="hidden md:block relative  flex-1 max-w-xs lg:max-w-sm" id="search-input-container">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
               <Search className="w-4 h-4" />
             </span>
@@ -189,79 +170,199 @@ export default function Header({
               className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-sm bg-gray-50 dark:bg-slate-800 text-slate-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-colors"
             />
           </div>
+          </div>
 
-         <div className="flex items-center gap-4">
-  {/* Desktop Cart */}
-  <button
-    onClick={openCart}
-    className="hidden lg:flex relative items-center justify-center p-2 rounded-full hover:bg-orange-100"
-  >
-    <ShoppingCart className="w-6 h-6" />
+          {/* Right-side controls (desktop) */}
+          <div className="hidden md:flex items-center  px-1 gap-1.5 shrink-0">
+            {/* Dark mode toggle */}
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-full hover:bg-orange-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
+              aria-label="Toggle dark mode"
+            >
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
 
-    {cartCount > 0 && (
-      <span className="absolute -top-1 -right-1 bg-orange-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">
-        {cartCount}
-      </span>
-    )}
-  </button>
+            {/* Cart */}
+            <button
+              onClick={openCart}
+              className="relative flex items-center justify-center p-2 rounded-full hover:bg-orange-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+            >
+              <ShoppingCart className="w-6 h-6" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-orange-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">
+                  {cartCount}
+                </span>
+              )}
+            </button>
 
-  {/* Login/Profile */}
-  {loggedInUser ? (
-    <button
-      onClick={() => setView("profile")}
-      className="p-2 rounded-full hover:bg-orange-100"
-    >
-      <User className="w-6 h-6 text-orange-600" />
-    </button>
-  ) : (
-    <button
-      onClick={onLoginClick}
-      className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2 rounded-lg"
-    >
-      Login
-    </button>
-  )}
-</div>
+            {/* Login / Profile */}
+            {loggedInUser ? (
+              <button onClick={() => setView("profile")} className="p-2 rounded-full hover:bg-orange-100 dark:hover:bg-slate-800">
+                <User className="w-6 h-6 text-orange-600" />
+              </button>
+            ) : (
+              <button
+                onClick={onLoginClick}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2 rounded-lg"
+              >
+                Login
+              </button>
+            )}
+          </div>
 
+          </nav>
+
+          {/* Search Box (desktop/tablet) */}
+          
+
+          {/* Mobile-only controls */}
+          <div className="flex md:hidden items-center gap-2 ml-auto">
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-full hover:bg-orange-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+              aria-label="Toggle dark mode"
+            >
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+
+            <button onClick={openCart} className="relative p-2">
+              <ShoppingCart className="w-5 h-5 text-slate-700 dark:text-slate-200" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-orange-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <X className="w-6 h-6 text-slate-700 dark:text-slate-200" />
+              ) : (
+                <Menu className="w-6 h-6 text-slate-700 dark:text-slate-200" />
+              )}
+            </button>
+          </div>
+
+          {/* Search box (mobile, full width, wraps below on small screens) */}
+          <div className="md:hidden order-3 w-full relative">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+              <Search className="w-4 h-4" />
+            </span>
+            <input
+              type="text"
+              placeholder="Search for products..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-sm bg-gray-50 dark:bg-slate-800 text-slate-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-colors"
+            />
           </div>
         </div>
-   
+      </div>
 
-      {/* Mobile Sticky Quick links bar */}
-      {
-        mobileMenuOpen && (
-          <div className="lg:hidden bg-white border-t shadow-md">
+      {/* Mobile Slide-down Menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-white dark:bg-slate-900 border-t dark:border-slate-800 shadow-md">
+          <div className="flex flex-col p-5 gap-4 text-slate-700 dark:text-slate-200 font-medium">
+            <button
+              className="text-left"
+              onClick={() => {
+                setView("home");
+                setSelectedCategory("All Categories");
+                setMobileMenuOpen(false);
+              }}
+            >
+              Home
+            </button>
+            <button
+              className="text-left"
+              onClick={() => {
+                setView("products");
+                setMobileMenuOpen(false);
+              }}
+            >
+              Products
+            </button>
 
-            <div className="flex flex-col p-5 gap-4">
+            {/* Categories, expanded inline on mobile */}
+            <div className="flex flex-col gap-2">
+              <span className="text-left text-slate-500 dark:text-slate-400 text-sm uppercase tracking-wide">
+                Categories
+              </span>
+              <div className="flex flex-col gap-2 pl-2 max-h-48 overflow-y-auto">
+                {CATEGORIES.map((cat) => (
+                  <button
+                    key={cat}
+                    className="text-left text-sm"
+                    onClick={() => {
+                      handleCategoryClick(cat);
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-              <button onClick={() => {
-                setView("home")
-                setMobileMenuOpen(false)
-              }}>Home</button>
+            <button
+              className="text-left"
+              onClick={() => {
+                setView("about");
+                setMobileMenuOpen(false);
+              }}
+            >
+              About
+            </button>
+            <button
+              className="text-left"
+              onClick={() => {
+                setView("contact");
+                setMobileMenuOpen(false);
+              }}
+            >
+              Contact
+            </button>
+            <button
+              className="text-left"
+              onClick={() => {
+                setView("seller");
+                setMobileMenuOpen(false);
+              }}
+            >
+              Seller Hub
+            </button>
 
-              <button onClick={() => {
-                setView("products")
-                setMobileMenuOpen(false)
-              }}>Products</button>
-
-              <button onClick={() => {
-                setView("about")
-                setMobileMenuOpen(false)
-              }}>About</button>
-
-              <button onClick={() => {
-                setView("contact")
-                setMobileMenuOpen(false)
-              }}>Contact</button>
-
-              <button onClick={() => {
-                setView("seller")
-                setMobileMenuOpen(false)
-              }}>Seller Hub</button>
+            <div className="border-t dark:border-slate-800 pt-4">
+              {loggedInUser ? (
+                <button
+                  className="text-left flex items-center gap-2"
+                  onClick={() => {
+                    setView("profile");
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <User className="w-5 h-5 text-orange-600" /> My Profile
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    onLoginClick();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2 rounded-lg w-full"
+                >
+                  Login
+                </button>
+              )}
             </div>
           </div>
-        )
-      }
+        </div>
+      )}
     </header>
   );
 }
