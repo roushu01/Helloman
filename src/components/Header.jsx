@@ -82,7 +82,7 @@ export default function Header({
             </div>
             <div className="flex items-baseline">
               <span className="text-2xl font-black tracking-tight text-orange-500">Hello</span>
-              <span className="text-2xl font-black tracking-tight text-slate-800 dark:text-white ml-0.5">Men</span>
+              <span className="text-2xl font-black tracking-tight text-slate-800 dark:text-white ml-0.5">Mem</span>
             </div>
           </div>
 
