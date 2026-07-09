@@ -14,13 +14,33 @@ import { PRODUCTS } from "./data";
 import SignupPage from "./components/SignupModel";
 import Profile from "./components/ProfileView";
 import { addToCart,getCart, updateCart,deleteCartItem} from "./api/cartApi";
-
+import ResetPassword from "./components/ResetPassword";
+import SellerDashboard from "./seller/SellerDashboard";
+import {resetPassword} from "./api/authApi";
 import { getProducts } from "./api/ProductApi";
 
 import { Grid, List, ChevronDown, CheckCircle, ArrowRight } from "lucide-react";
 
 export default function App() {
+   const path = window.location.pathname;
+
+    const isResetPassword = path.startsWith("/reset-password/");
+    const resetToken = isResetPassword
+      ? path.split("/reset-password/")[1]
+      : "";
+
+
+      //Seller login
+     const onSellerLogin= (user) => {
+        if (user.role === "seller") {
+          setLoggedInUser(user);
+          setView("seller-dashboard");
+        } else {
+          alert("You are not authorized to access the seller dashboard.");
+        }
+      };
   // Navigation & View State
+ 
   const [currentView, setView] = useState("home"); // "home", "products", "about", "contact", "seller"
   const [selectedProduct, setSelectedProduct] = useState(null);
 
@@ -311,16 +331,18 @@ console.log(filteredProducts);
   setCartItems([]);
   setView("home");
 };
-
+if (isResetPassword) {
+  return <ResetPassword token={resetToken} />;
+}
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-950 transition-colors duration-200">
+    <div className="min-h-screen flex flex-col bg-gray-50 transition-colors duration-200">
       {/* Interactive Global Alerts */}
       {notification && (
         <div className="fixed top-24 right-6 z-55 max-w-sm animate-bounce" id="global-notification">
           <div className={`p-4 rounded-xl shadow-2xl border flex items-center gap-3 ${
             notification.type === "success" 
-              ? "bg-green-50 dark:bg-green-950/90 border-green-200 dark:border-green-900 text-green-800 dark:text-green-300"
-              : "bg-blue-50 dark:bg-slate-800/90 border-blue-200 dark:border-slate-700 text-blue-800 dark:text-blue-300"
+              ? "bg-green-50  border-green-200 text-green-800 "
+              : "bg-blue-50  border-blue-200 text-blue-800 "
           }`}>
             <CheckCircle className="w-5 h-5 shrink-0" />
             <span className="text-xs font-bold leading-snug">{notification.message}</span>
@@ -329,11 +351,12 @@ console.log(filteredProducts);
       )}
 
       {/* Header */}
-      <Header
-        currentView={currentView}
-        setView={(v) => {
-          setView(v);
-          setSelectedProduct(null);
+      {currentView !== "seller-dashboard" && (
+        <Header
+          currentView={currentView}
+          setView={(v) => {
+            setView(v);
+            setSelectedProduct(null);
         }}
         setSelectedCategory={(cat) => {
           setSelectedCategory(cat);
@@ -348,11 +371,14 @@ console.log(filteredProducts);
         loggedInUser={loggedInUser}
         onLogout={handleLogout}
       />
+      )}
 
       {/* Main Container */}
       <main className="flex-1 pb-16">
         {currentView === "profile" && (
-           <Profile user={loggedInUser} />
+           <Profile user={loggedInUser}
+           onLogout={handleLogout}
+           />
         )}
         {currentView === "home" && (
           <div className="flex flex-col gap-10">
@@ -371,8 +397,15 @@ console.log(filteredProducts);
             />
 
             {/* Catalog Split Layout */}
-            <div className="max-w-7xl mx-auto px-4 md:px-8 w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex flex-col ">
+            <h1 className="text-3xl  font-bold text-slate-900 ">Products</h1>
+            <h1 className="text-md text-slate-600 ">
+              {products.length} found
+            </h1>
+            </div>
+            <div className="max-w-7xl mx-auto px-1  w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-start -mt-6">
               {/* Left filter panel */}
+              
               <div className="lg:col-span-3">
                 <SidebarFilters
                   selectedCategory={selectedCategory}
@@ -389,26 +422,21 @@ console.log(filteredProducts);
               {/* Right products pane */}
               <div className="lg:col-span-9 flex flex-col gap-6">
                 {/* Section header controls */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-150 dark:border-slate-800 pb-5">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-150 pb-5">
                   <div>
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                      Products
-                    </h2>
-                    <p className="text-xs text-slate-400 mt-1">
-                      Showing {filteredProducts.length} premium items curated in Rajasthan
-                    </p>
+                    
                   </div>
 
                   {/* Grid/List View & Sort Controls */}
                   <div className="flex items-center gap-3.5 self-end sm:self-auto">
                     {/* View selectors */}
-                    <div className="flex items-center border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-1 shadow-xs">
+                    <div className="flex items-center border border-gray-200  bg-white  rounded-lg p-1 shadow-xs">
                       <button
                         onClick={() => setIsGridView(true)}
                         className={`p-1.5 rounded-md cursor-pointer transition-all ${
                           isGridView
                             ? "bg-blue-600 text-white shadow-xs"
-                            : "text-slate-400 hover:text-slate-600 dark:text-slate-500"
+                            : "text-slate-400 hover:text-slate-600"
                         }`}
                       >
                         <Grid className="w-4 h-4" />
@@ -418,7 +446,7 @@ console.log(filteredProducts);
                         className={`p-1.5 rounded-md cursor-pointer transition-all ${
                           !isGridView
                             ? "bg-blue-600 text-white shadow-xs"
-                            : "text-slate-400 hover:text-slate-600 dark:text-slate-500"
+                            : "text-slate-400 hover:text-slate-600 "
                         }`}
                       >
                         <List className="w-4 h-4" />
@@ -429,7 +457,7 @@ console.log(filteredProducts);
                     <div className="relative">
                       <button
                         onClick={() => setShowSortDropdown(!showSortDropdown)}
-                        className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg py-2 px-3.5 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 shadow-xs cursor-pointer hover:border-gray-300"
+                        className="bg-white  border border-gray-200  rounded-lg py-2 px-3.5 text-xs font-bold text-slate-700  flex items-center gap-2 shadow-xs cursor-pointer hover:border-gray-300"
                       >
                         <span>
                           Sort by:{" "}
@@ -447,7 +475,7 @@ console.log(filteredProducts);
                       {showSortDropdown && (
                         <>
                           <div className="fixed inset-0 z-10" onClick={() => setShowSortDropdown(false)} />
-                          <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 border border-gray-150 dark:border-slate-700 rounded-xl shadow-xl z-20 py-2 text-xs">
+                          <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-150  rounded-xl shadow-xl z-20 py-2 text-xs">
                             {[
                               { id: "popularity", label: "Popularity" },
                               { id: "price-low", label: "Price: Low to High" },
@@ -460,7 +488,7 @@ console.log(filteredProducts);
                                   setSortBy(opt.id);
                                   setShowSortDropdown(false);
                                 }}
-                                className="w-full text-left px-4 py-2 hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-slate-700 dark:hover:text-white text-slate-700 dark:text-slate-300"
+                                className="w-full text-left px-4 py-2 hover:bg-orange-50 hover:text-orange-600  text-slate-700 "
                               >
                                 {opt.label}
                               </button>
@@ -474,8 +502,8 @@ console.log(filteredProducts);
 
                 {/* Main Product Display Area */}
                 {sortedProducts.length === 0 ? (
-                  <div className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-4 shadow-sm h-80">
-                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400">
+                  <div className="bg-white  border border-gray-150  rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-4 shadow-sm h-80">
+                    <p className="text-sm font-bold text-slate-500 ">
                       No matching products found.
                     </p>
                     <button
@@ -489,7 +517,7 @@ console.log(filteredProducts);
                   <>
                     {/* Grid view */}
                     {isGridView ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 ml-10 md:grid-cols-3 gap-6">
                         {paginatedProducts.map((product) => (
                           <ProductCard
                             key={product._id}
@@ -509,7 +537,7 @@ console.log(filteredProducts);
                           <div
                             key={product._id}
                             onClick={() => handleViewDetails(product._id)}
-                            className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-4 flex gap-5 items-center cursor-pointer hover:shadow-lg hover:border-orange-200 transition-all shadow-sm"
+                            className="bg-white  border border-gray-150  rounded-2xl p-4 flex gap-5 items-center cursor-pointer hover:shadow-lg hover:border-orange-200 transition-all shadow-sm"
                           >
                             <img
                                 src={product.thumbnail?.url || product.images?.[0]?.url}
@@ -518,11 +546,11 @@ console.log(filteredProducts);
                               referrerPolicy="no-referrer"
                             />
                             <div className="flex-1 flex flex-col gap-1 pr-4">
-                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{product.brand}</span>
-                              <h3 className="text-sm font-bold text-slate-800 dark:text-gray-100 line-clamp-1">{product.name}</h3>
-                              <p className="text-xs text-slate-400 dark:text-slate-500 line-clamp-2 leading-relaxed mt-0.5">{product.description}</p>
+                              <span className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">{product.brand}</span>
+                              <h3 className="text-sm font-bold text-slate-800  line-clamp-1">{product.name}</h3>
+                              <p className="text-xs text-slate-400  line-clamp-2 leading-relaxed mt-0.5">{product.description}</p>
                               <div className="flex items-center gap-3 mt-1.5">
-                                <span className="text-base font-black text-slate-950 dark:text-white">₹{product.price}</span>
+                                <span className="text-base font-black text-slate-950">₹{product.price}</span>
                                 <span className="text-xs text-green-600 font-bold">{product.stock} in stock</span>
                               </div>
                             </div>
@@ -546,7 +574,7 @@ console.log(filteredProducts);
                         <button
                           disabled={currentPage === 1}
                           onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                          className="bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 border border-gray-250 dark:border-slate-800 py-2 px-4 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                          className="bg-white hover:bg-gray-50 0 border border-gray-250  py-2 px-4 rounded-lg text-xs font-bold text-slate-600  disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                         >
                           Previous
                         </button>
@@ -557,7 +585,7 @@ console.log(filteredProducts);
                             className={`py-2 px-4 rounded-lg text-xs font-black border transition-all cursor-pointer ${
                               currentPage === i + 1
                                 ? "bg-blue-600 border-blue-600 text-white"
-                                : "bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 border-gray-250 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                                : "bg-white  hover:bg-gray-50  border-gray-250 text-slate-700 "
                             }`}
                           >
                             {i + 1}
@@ -566,7 +594,7 @@ console.log(filteredProducts);
                         <button
                           disabled={currentPage === totalPages}
                           onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                          className="bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 border border-gray-250 dark:border-slate-800 py-2 px-4 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                          className="bg-white  hover:bg-gray-50  border border-gray-250 py-2 px-4 rounded-lg text-xs font-bold text-slate-600  disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                         >
                           Next
                         </button>
@@ -578,10 +606,10 @@ console.log(filteredProducts);
             </div>
 
             {/* Recent Products Row matching screenshots */}
-            <div className="border-t border-gray-100 dark:border-slate-900 pt-10 pb-4 max-w-7xl mx-auto px-4 md:px-8 w-full" id="recent-products-shelf">
+            <div className="border-t border-gray-100   pb-4 max-w-7xl mx-auto px-4 md:px-8 w-full" id="recent-products-shelf">
               <div className="flex justify-between items-baseline mb-6">
                 <div>
-                  <h2 className="text-xl font-black text-slate-950 dark:text-white tracking-tight">Recent Products</h2>
+                  <h2 className="text-xl font-black text-slate-950  tracking-tight">Recent Products</h2>
                   <p className="text-xs text-slate-400 mt-0.5">Brand new collections fresh from Jaipur workshops</p>
                 </div>
                 <button
@@ -628,8 +656,14 @@ console.log(filteredProducts);
         {/* Catalog page view */}
         {currentView === "products" && (
           <div className="max-w-7xl mx-auto px-4 md:px-8 pt-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-            {/* Left filter panel */}
+           
+              
+            
             <div className="lg:col-span-3">
+              <span className="text-lg ml-5 font-bold text-slate-900  tracking-tight">Products</span>
+              <p className="text-md text-slate-400 ml-5">
+                {filteredProducts.length} items
+              </p>
               <SidebarFilters
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
@@ -643,27 +677,20 @@ console.log(filteredProducts);
             </div>
 
             {/* Right products grid */}
-            <div className="lg:col-span-9 flex flex-col gap-6">
+            <div className="ml-5 lg:col-span-9 flex flex-col gap-6">
               {/* Header */}
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-150 dark:border-slate-800 pb-5">
-                <div>
-                  <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                    HelloMem Catalog
-                  </h2>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Showing {filteredProducts.length} premium products in {appliedFilters.category}
-                  </p>
-                </div>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-150 pb-5">
+               <div></div>
 
                 {/* Grid vs List & Sort */}
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg p-1 shadow-xs">
+                  <div className="flex items-center border border-gray-200 bg-white  rounded-lg p-1 shadow-xs">
                     <button
                       onClick={() => setIsGridView(true)}
                       className={`p-1.5 rounded-md cursor-pointer transition-all ${
                         isGridView
                           ? "bg-blue-600 text-white shadow-xs"
-                          : "text-slate-400 hover:text-slate-600 dark:text-slate-500"
+                          : "text-slate-400 hover:text-slate-600 "
                       }`}
                     >
                       <Grid className="w-4 h-4" />
@@ -683,7 +710,7 @@ console.log(filteredProducts);
                   <div className="relative">
                     <button
                       onClick={() => setShowSortDropdown(!showSortDropdown)}
-                      className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg py-2 px-3.5 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 shadow-xs cursor-pointer hover:border-gray-300"
+                      className="bg-white  border border-gray-200 rounded-lg py-2 px-3.5 text-xs font-bold text-slate-700  flex items-center gap-2 shadow-xs cursor-pointer hover:border-gray-300"
                     >
                       <span>
                         Sort:{" "}
@@ -701,7 +728,7 @@ console.log(filteredProducts);
                     {showSortDropdown && (
                       <>
                         <div className="fixed inset-0 z-10" onClick={() => setShowSortDropdown(false)} />
-                        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 border border-gray-150 dark:border-slate-700 rounded-xl shadow-xl z-20 py-2 text-xs">
+                        <div className="absolute right-0 mt-2 w-48 bg-white  border border-gray-150 d rounded-xl shadow-xl z-20 py-2 text-xs">
                           {[
                             { id: "popularity", label: "Popularity" },
                             { id: "price-low", label: "Price: Low to High" },
@@ -714,7 +741,7 @@ console.log(filteredProducts);
                                 setSortBy(opt.id);
                                 setShowSortDropdown(false);
                               }}
-                              className="w-full text-left px-4 py-2 hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-slate-700 dark:hover:text-white text-slate-700 dark:text-slate-300 animate-fade-in"
+                              className="w-full text-left px-4 py-2 hover:bg-orange-50 hover:text-orange-600  text-slate-700  animate-fade-in"
                             >
                               {opt.label}
                             </button>
@@ -728,8 +755,8 @@ console.log(filteredProducts);
 
               {/* Products Area */}
               {sortedProducts.length === 0 ? (
-                <div className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-4 shadow-sm h-80">
-                  <p className="text-sm font-bold text-slate-500 dark:text-slate-400">
+                <div className="bg-white  border border-gray-150 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-4 shadow-sm h-80">
+                  <p className="text-sm font-bold text-slate-500 ">
                     No products matched your specified parameters.
                   </p>
                   <button
@@ -761,7 +788,7 @@ console.log(filteredProducts);
                         <div
                           key={product._id}
                           onClick={() => handleViewDetails(product._id)}
-                          className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-4 flex gap-5 items-center cursor-pointer hover:shadow-lg hover:border-orange-200 transition-all shadow-sm"
+                          className="bg-white  border border-gray-150 rounded-2xl p-4 flex gap-5 items-center cursor-pointer hover:shadow-lg hover:border-orange-200 transition-all shadow-sm"
                         >
                           <img
                             src={product.thumbnail?.url || product.images?.[0]?.url}
@@ -771,10 +798,10 @@ console.log(filteredProducts);
                           />
                           <div className="flex-1 flex flex-col gap-1 pr-4">
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{product.vendor}</span>
-                            <h3 className="text-sm font-bold text-slate-800 dark:text-gray-100 line-clamp-1">{product.title}</h3>
-                            <p className="text-xs text-slate-400 dark:text-slate-500 line-clamp-2 leading-relaxed mt-0.5">{product.description}</p>
+                            <h3 className="text-sm font-bold text-slate-800  line-clamp-1">{product.title}</h3>
+                            <p className="text-xs text-slate-400  line-clamp-2 leading-relaxed mt-0.5">{product.description}</p>
                             <div className="flex items-center gap-3 mt-1.5">
-                              <span className="text-base font-black text-slate-950 dark:text-white">₹{product.price}</span>
+                              <span className="text-base font-black text-slate-950 ">₹{product.price}</span>
                               <span className="text-xs text-green-600 font-bold">{product.stock} in stock</span>
                             </div>
                           </div>
@@ -797,7 +824,7 @@ console.log(filteredProducts);
                       <button
                         disabled={currentPage === 1}
                         onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                        className="bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 border border-gray-250 dark:border-slate-800 py-2 px-4 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                        className="bg-white  hover:bg-gray-50  border border-gray-250 py-2 px-4 rounded-lg text-xs font-bold text-slate-600  disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                       >
                         Previous
                       </button>
@@ -808,7 +835,7 @@ console.log(filteredProducts);
                           className={`py-2 px-4 rounded-lg text-xs font-black border transition-all cursor-pointer ${
                             currentPage === i + 1
                               ? "bg-blue-600 border-blue-600 text-white"
-                              : "bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 border-gray-250 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                              : "bg-white  hover:bg-gray-50  border-gray-250 text-slate-700 "
                           }`}
                         >
                           {i + 1}
@@ -817,7 +844,7 @@ console.log(filteredProducts);
                       <button
                         disabled={currentPage === totalPages}
                         onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                        className="bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 border border-gray-250 dark:border-slate-800 py-2 px-4 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                        className="bg-white  hover:bg-gray-50  border border-gray-250 py-2 px-4 rounded-lg text-xs font-bold text-slate-600  disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                       >
                         Next
                       </button>
@@ -849,7 +876,14 @@ console.log(filteredProducts);
         {currentView === "contact" && <ContactUs />}
 
         {/* Seller Registration Portal View */}
-        {currentView === "seller" && <SellerRegister />}
+        {currentView === "seller" && (
+            <SellerRegister
+              onSellerLogin={onSellerLogin}
+            />
+          )}
+        {currentView === "seller-dashboard" && loggedInUser && loggedInUser.role === "seller" && (
+          <SellerDashboard user={loggedInUser} />
+        )}
       </main>
 
       {/* Cart Drawer Overlay */}
@@ -866,13 +900,15 @@ console.log(filteredProducts);
 
         {currentView === "login" && (
           <LoginPage
-            onLoginSuccess={(user) => {
-              handleLoginSuccess(user);
-              setView("home");
-            }}
-            onSwitchToSignup={() => {
-              setView("signup");
-            }}
+              onLoginSuccess={(user) => {
+                  if (user.role === "seller") {
+                      setLoggedInUser(user);
+                      setView("seller-dashboard");
+                  } else {
+                      handleLoginSuccess(user);
+                  }
+              }}
+              onSwitchToSignup={() => setView("signup")}
           />
         )}
 

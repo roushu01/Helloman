@@ -29,3 +29,27 @@ export const signup = async (data) => {
     throw error; // IMPORTANT
   }
 };
+export const forgotPassword = async (email) => {
+  try{  
+  const { data } = await api.post("/api/auth/forgot-password", {
+    email,
+  });
+
+  return data;
+}catch (error) {
+  console.log("Status:", error.response?.status);
+  console.log("Data:", error.response?.data);
+  console.log("URL:", error.config?.url);
+  console.log(error);
+}
+};
+export const resetPassword = async (token, password) => {
+  const res = await api.patch(
+    `/api/auth/reset-password/${token}`,
+    {
+      password,
+    }
+  );
+
+  return res.data;
+};

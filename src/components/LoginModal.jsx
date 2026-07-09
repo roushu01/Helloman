@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {login} from "../api/authApi";
+import {login,forgotPassword} from "../api/authApi";
 import {
   Mail,
   Lock,
@@ -17,7 +17,11 @@ export default function LoginPage({ onLoginSuccess, onSwitchToSignup }) {
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+
+const [showForgotPassword, setShowForgotPassword] = useState(false);
  const [loading, setLoading] = useState(false);
+
 const [error, setError] = useState("");
 
 const handleSubmit = async (e) => {
@@ -56,7 +60,56 @@ const handleSubmit = async (e) => {
     setLoading(false);
   }
 };
+const handleChangePassword = async () => {
+  try {
+    setChangeLoading(true);
+    setChangeError("");
 
+    const body = {
+      currentPassword,
+      newPassword,
+    };
+
+    // Customer
+    const res = await changeCustomerPassword(body);
+
+    // Seller
+    // const res = await changeSellerPassword(body);
+
+    if (res.success) {
+      alert("Password changed successfully");
+
+      setShowChangePassword(false);
+      setCurrentPassword("");
+      setNewPassword("");
+    } else {
+      setChangeError(res.message);
+    }
+  } catch (err) {
+    setChangeError(
+      err.response?.data?.message || "Failed to change password"
+    );
+  } finally {
+    setChangeLoading(false);
+  }
+};
+const [forgotLoading, setForgotLoading] = useState(false);
+
+const handleForgotPassword = async () => {
+  try {
+    setForgotLoading(true);
+
+    const res = await forgotPassword(email);
+
+    alert(res.message);
+    setShowForgotPassword(false);
+
+  } catch (err) {
+    alert(err.response?.data?.message || "Something went wrong");
+  } finally {
+    setForgotLoading(false);
+  }
+};
   return (
     <div>
       {/* Top utility bar */}
@@ -134,12 +187,13 @@ const handleSubmit = async (e) => {
               />
               Remember me
             </label>
-            <a
-              href="#"
-              className="text-blue-600 font-medium hover:underline"
-            >
-              Forgot your password?
-            </a>
+            <button
+            type="button"
+            onClick={() => setShowForgotPassword(true)}
+            className="text-blue-600 font-medium hover:underline"
+          >
+            Forgot your password?
+          </button>
           </div>
 
           {/* Submit */}
@@ -162,7 +216,44 @@ const handleSubmit = async (e) => {
             </button>
           </p>
         </form>
+
       </main>
+     {showForgotPassword && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-xl w-full max-w-md">
+
+      <h2 className="text-xl font-bold mb-4">
+        Forgot Password
+      </h2>
+
+      <input
+        type="email"
+        placeholder="Enter your email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="w-full border rounded-lg p-3 mb-4"
+      />
+
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => setShowForgotPassword(false)}
+          className="border px-4 py-2 rounded-lg"
+        >
+          Cancel
+        </button>
+
+        <button
+        onClick={handleForgotPassword}
+        disabled={forgotLoading}
+        className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+      >
+        {forgotLoading ? "Sending..." : "Send Reset Link"}
+      </button>
+      </div>
+
+    </div>
+  </div>
+)}
     </div>
   );
 }

@@ -27,7 +27,7 @@ export default function Footer({ setView, setSelectedCategory }) {
   };
 
   return (
-    <footer className="bg-[#0b1528] text-gray-300 transition-colors border-t border-slate-800" id="hellomem-footer">
+    <footer className="bg-[#080f1e] text-gray-300 transition-colors border-t border-slate-800" id="hellomem-footer">
       {/* Upper Main Footer Grid */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12" id="footer-upper">
         {/* Left Column: HelloMem Intro */}
@@ -35,14 +35,14 @@ export default function Footer({ setView, setSelectedCategory }) {
           {/* Logo */}
           <div 
             onClick={() => handlePageClick("home")}
-            className="flex items-center gap-2 cursor-pointer group w-max"
+            className="flex bg-white items-center justify-center gap-2 cursor-pointer group w-65 h-12"
           >
             <div className="bg-orange-500 text-white p-1.5 rounded-lg shadow-sm group-hover:scale-105 transition-transform">
               <ShoppingBag className="w-5 h-5" />
             </div>
             <div className="flex items-baseline">
-              <span className="text-xl font-black tracking-tight text-orange-500">Hello</span>
-              <span className="text-xl font-black tracking-tight text-white ml-0.5">Mem</span>
+              <span className="text-3xl font-black tracking-tight text-orange-500">Hello</span>
+              <span className="text-3xl font-black tracking-tight text-black ml-0.5">Mem</span>
             </div>
           </div>
 
