@@ -8,7 +8,7 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
   return (
     <div
       onClick={() => onViewDetails(product._id)}
-      className="group bg-white dark:bg-slate-900  rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:border-orange-200 dark:hover:border-orange-950/30 transition-all duration-300 flex flex-col h-full cursor-pointer relative"
+      className="group bg-white   rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:border-orange-200  transition-all duration-300 flex flex-col h-full cursor-pointer relative"
       id={`product-card-${product._id}`}
     >
       {/* Product Image Area */}
@@ -46,12 +46,12 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
       {/* Product Text Details */}
       <div className="p-4.5 flex flex-col flex-1 gap-2.5">
         {/* Vendor tag */}
-        <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest truncate">
+        <span className="text-[11px] font-bold text-slate-400  uppercase tracking-widest truncate">
           {product.brand}
         </span>
 
         {/* Title */}
-        <h4 className="text-sm font-bold text-slate-800 dark:text-gray-100 group-hover:text-orange-500 transition-colors line-clamp-2 leading-snug">
+        <h4 className="text-sm font-bold text-slate-800  group-hover:text-orange-500 transition-colors line-clamp-2 leading-snug">
           {product.name}
         </h4>
 
@@ -62,23 +62,23 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
               <Star
                 key={i}
                 className={`w-3.5 h-3.5 ${
-                  i < Math.floor(product.rating) ? "fill-current text-yellow-400" : "text-gray-200 dark:text-slate-700"
+                  i < Math.floor(product.rating) ? "fill-current text-yellow-400" : "text-gray-200 "
                 }`}
               />
             ))}
           </div>
-          <span className="text-[12px] font-bold text-slate-500 dark:text-slate-400">
+          <span className="text-[12px] font-bold text-slate-500 ">
             {/* {product.rating.toFixed(1)} <span className="text-gray-300 dark:text-slate-700 font-normal">({product.reviewsCount || 0})</span> */}
           </span>
         </div>
 
         {/* Price & Stock Row */}
-        <div className="mt-auto pt-2.5 border-t border-gray-50 dark:border-slate-800/60 flex items-center justify-between">
+        <div className="mt-auto pt-2.5 border-t border-gray-50  flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-lg font-black text-slate-900 dark:text-white">
+            <span className="text-lg font-black text-slate-900 ">
               ₹{product.price.toLocaleString("en-IN")}
             </span>
-            <span className="text-[11px] font-bold text-green-600 dark:text-green-400 flex items-center gap-1 mt-0.5">
+            <span className="text-[11px] font-bold text-green-600  flex items-center gap-1 mt-0.5">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
               {product.stock} in stock
             </span>
@@ -87,7 +87,7 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
           {/* Quick Add To Cart Icon-Button */}
           <button
             onClick={(e) => onAddToCart(product, e)}
-            className="bg-orange-50 hover:bg-orange-500 text-orange-600 hover:text-white dark:bg-slate-800 dark:hover:bg-orange-500 dark:text-orange-400 dark:hover:text-white p-2.5 rounded-xl transition-all cursor-pointer transform active:scale-95 shadow-sm hover:shadow-md"
+            className="bg-orange-50 hover:bg-orange-500 text-orange-600 hover:text-white  p-2.5 rounded-xl transition-all cursor-pointer transform active:scale-95 shadow-sm hover:shadow-md"
             title="Add to Cart"
           >
             <ShoppingCart className="w-4 h-4" />
