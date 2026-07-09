@@ -29,3 +29,28 @@ export const signup = async (data) => {
     throw error; // IMPORTANT
   }
 };
+export const forgotPassword = async (email) => {
+  try{  
+  const { data } = await API.post("/api/auth/forget-password", {
+    email,
+  });
+
+  return data;
+}catch (error) {  
+  console.log(
+    error.response?.data ||
+    error.message
+  );
+
+}
+};
+export const resetPassword = async (token, password) => {
+  const res = await api.put(
+    `/api/customer/reset-password/${token}`,
+    {
+      password,
+    }
+  );
+
+  return res.data;
+};
