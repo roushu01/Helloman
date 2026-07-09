@@ -14,13 +14,21 @@ import { PRODUCTS } from "./data";
 import SignupPage from "./components/SignupModel";
 import Profile from "./components/ProfileView";
 import { addToCart,getCart, updateCart,deleteCartItem} from "./api/cartApi";
-
+import ResetPassword from "./components/ResetPassword";
+import {resetPassword} from "./api/authApi";
 import { getProducts } from "./api/ProductApi";
 
 import { Grid, List, ChevronDown, CheckCircle, ArrowRight } from "lucide-react";
 
 export default function App() {
+   const path = window.location.pathname;
+
+    const isResetPassword = path.startsWith("/reset-password/");
+    const resetToken = isResetPassword
+      ? path.split("/reset-password/")[1]
+      : "";
   // Navigation & View State
+ 
   const [currentView, setView] = useState("home"); // "home", "products", "about", "contact", "seller"
   const [selectedProduct, setSelectedProduct] = useState(null);
 
@@ -311,7 +319,9 @@ console.log(filteredProducts);
   setCartItems([]);
   setView("home");
 };
-
+if (isResetPassword) {
+  return <ResetPassword token={resetToken} />;
+}
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-950 transition-colors duration-200">
       {/* Interactive Global Alerts */}
@@ -352,7 +362,9 @@ console.log(filteredProducts);
       {/* Main Container */}
       <main className="flex-1 pb-16">
         {currentView === "profile" && (
-           <Profile user={loggedInUser} />
+           <Profile user={loggedInUser}
+           onLogout={handleLogout}
+           />
         )}
         {currentView === "home" && (
           <div className="flex flex-col gap-10">
@@ -371,8 +383,15 @@ console.log(filteredProducts);
             />
 
             {/* Catalog Split Layout */}
-            <div className="max-w-7xl mx-auto px-4 md:px-8 w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex flex-col ">
+            <h1 className="text-3xl  font-bold text-slate-900 dark:text-white">Products</h1>
+            <h1 className="text-md text-slate-600 dark:text-slate-400">
+              {products.length} found
+            </h1>
+            </div>
+            <div className="max-w-7xl mx-auto px-1  w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-start -mt-6">
               {/* Left filter panel */}
+              
               <div className="lg:col-span-3">
                 <SidebarFilters
                   selectedCategory={selectedCategory}
@@ -391,12 +410,7 @@ console.log(filteredProducts);
                 {/* Section header controls */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-150 dark:border-slate-800 pb-5">
                   <div>
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                      Products
-                    </h2>
-                    <p className="text-xs text-slate-400 mt-1">
-                      Showing {filteredProducts.length} premium items curated in Rajasthan
-                    </p>
+                    
                   </div>
 
                   {/* Grid/List View & Sort Controls */}
@@ -489,7 +503,7 @@ console.log(filteredProducts);
                   <>
                     {/* Grid view */}
                     {isGridView ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 ml-10 md:grid-cols-3 gap-6">
                         {paginatedProducts.map((product) => (
                           <ProductCard
                             key={product._id}
@@ -578,7 +592,7 @@ console.log(filteredProducts);
             </div>
 
             {/* Recent Products Row matching screenshots */}
-            <div className="border-t border-gray-100 dark:border-slate-900 pt-10 pb-4 max-w-7xl mx-auto px-4 md:px-8 w-full" id="recent-products-shelf">
+            <div className="border-t border-gray-100 dark:border-slate-900  pb-4 max-w-7xl mx-auto px-4 md:px-8 w-full" id="recent-products-shelf">
               <div className="flex justify-between items-baseline mb-6">
                 <div>
                   <h2 className="text-xl font-black text-slate-950 dark:text-white tracking-tight">Recent Products</h2>
