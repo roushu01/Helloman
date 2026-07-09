@@ -10,8 +10,8 @@ export default function Header({
   openCart,
   searchQuery,
   setSearchQuery,
-  isDarkMode,
-  toggleDarkMode,
+  isMode,
+  toggleMode,
   onLoginClick,
   loggedInUser,
   onLogout,
@@ -80,7 +80,7 @@ export default function Header({
 
       {/* Main Navigation Row */}
       <div
-        className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 transition-colors py-3.5"
+        className="bg-white border-b border-gray-100  transition-colors py-3.5"
         id="navbar-main"
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 px-4 md:px-8">
@@ -95,14 +95,14 @@ export default function Header({
             </div>
             <div className="flex items-baseline">
               <span className="text-xl font-bold tracking-tight text-orange-500">Hello</span>
-              <span className="text-xl font-bold tracking-tight text-slate-800 dark:text-white ml-0.5">
+              <span className="text-xl font-bold tracking-tight text-slate-800  ml-0.5">
                 Mem
               </span>
             </div>
           </div>
 
           {/* Desktop Nav Links (unchanged content/classes — lg+ only) */}
-          <nav className="hidden lg:flex items-center gap-5 text-md font-medium text-slate-600 dark:text-slate-300 flex-1 justify-center">
+          <nav className="hidden lg:flex items-center gap-5 text-md font-medium text-slate-600  flex-1 justify-center">
             <button onClick={goHome} className={navLinkClass("home")}>
               Home
             </button>
@@ -127,12 +127,12 @@ export default function Header({
               {showCategoriesDropdown && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setShowCategoriesDropdown(false)} />
-                  <div className="absolute left-0 mt-2 w-56 max-h-80 overflow-y-auto bg-white dark:bg-slate-800 rounded-xl shadow-xl z-20 py-2 scrollbar-thin">
+                  <div className="absolute left-0 mt-2 w-56 max-h-80 overflow-y-auto bg-white  rounded-xl shadow-xl z-20 py-2 scrollbar-thin">
                     {CATEGORIES.map((cat) => (
                       <button
                         key={cat}
                         onClick={() => handleCategoryClick(cat)}
-                        className="w-full text-left px-4 py-2 text-sm hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-slate-700 dark:hover:text-white text-slate-700 dark:text-slate-200 transition-colors"
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-orange-50 hover:text-orange-600 transition-colors"
                       >
                         {cat}
                       </button>
@@ -158,7 +158,7 @@ export default function Header({
                 placeholder="Search for products..."
                 value={searchQuery}
                 onChange={handleSearchChange}
-                className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-sm bg-gray-50 dark:bg-slate-800 text-slate-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-colors"
+                className="w-full pl-9 pr-4 py-2 border border-gray-200 :border-slate-700 rounded-lg text-sm bg-gray-50 :bg-slate-800 text-slate-800 :text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-colors"
               />
             </div>
           </nav>
@@ -166,16 +166,16 @@ export default function Header({
           {/* Right-side controls (desktop, lg+) */}
           <div className="hidden lg:flex items-center gap-1.5 shrink-0">
             <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-full hover:bg-orange-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
-              aria-label="Toggle dark mode"
+              onClick={toggleMode}
+              className="p-2 rounded-full hover:bg-orange-100 :hover:bg-slate-800 text-slate-600 :text-slate-300 transition-colors"
+              aria-label="Toggle  mode"
             >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {isMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
 
             <button
               onClick={openCart}
-              className="relative flex items-center justify-center p-2 rounded-full hover:bg-orange-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+              className="relative flex items-center justify-center p-2 rounded-full hover:bg-orange-100 :hover:bg-slate-800 text-slate-700 :text-slate-200"
             >
               <ShoppingCart className="w-6 h-6" />
               {cartCount > 0 && (
@@ -186,7 +186,7 @@ export default function Header({
             </button>
 
             {loggedInUser ? (
-              <button onClick={() => setView("profile")} className="p-2 rounded-full hover:bg-orange-100 dark:hover:bg-slate-800">
+              <button onClick={() => setView("profile")} className="p-2 rounded-full hover:bg-orange-100 :hover:bg-slate-800">
                 <User className="w-6 h-6 text-orange-600" />
               </button>
             ) : (
@@ -203,15 +203,15 @@ export default function Header({
               so there's no dead zone between md and lg anymore */}
           <div className="flex lg:hidden items-center gap-2 shrink-0">
             <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-full hover:bg-orange-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-              aria-label="Toggle dark mode"
+              onClick={toggleMode}
+              className="p-2 rounded-full hover:bg-orange-100 :hover:bg-slate-800 text-slate-600 :text-slate-300"
+              aria-label="Toggle  mode"
             >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {isMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
 
             <button onClick={openCart} className="relative p-2">
-              <ShoppingCart className="w-5 h-5 text-slate-700 dark:text-slate-200" />
+              <ShoppingCart className="w-5 h-5 text-slate-700 :text-slate-200" />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-orange-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">
                   {cartCount}
@@ -221,13 +221,13 @@ export default function Header({
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800"
+              className="p-2 rounded-md hover:bg-gray-100 :hover:bg-slate-800"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? (
-                <X className="w-6 h-6 text-slate-700 dark:text-slate-200" />
+                <X className="w-6 h-6 text-slate-700 :text-slate-200" />
               ) : (
-                <Menu className="w-6 h-6 text-slate-700 dark:text-slate-200" />
+                <Menu className="w-6 h-6 text-slate-700 :text-slate-200" />
               )}
             </button>
           </div>
@@ -244,7 +244,7 @@ export default function Header({
               placeholder="Search for products..."
               value={searchQuery}
               onChange={handleSearchChange}
-              className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-sm bg-gray-50 dark:bg-slate-800 text-slate-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-colors"
+              className="w-full pl-9 pr-4 py-2 border border-gray-200 :border-slate-700 rounded-lg text-sm bg-gray-50 :bg-slate-800 text-slate-800 :text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-colors"
             />
           </div>
         </div>
@@ -252,8 +252,8 @@ export default function Header({
 
       {/* Mobile/Tablet Slide-down Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white dark:bg-slate-900 border-t dark:border-slate-800 shadow-md">
-          <div className="flex flex-col p-5 gap-4 text-slate-700 dark:text-slate-200 font-medium">
+        <div className="lg:hidden bg-white :bg-slate-900 border-t :border-slate-800 shadow-md">
+          <div className="flex flex-col p-5 gap-4 text-slate-700 :text-slate-200 font-medium">
             <button
               className="text-left"
               onClick={() => {
@@ -274,7 +274,7 @@ export default function Header({
             </button>
 
             <div className="flex flex-col gap-2">
-              <span className="text-left text-slate-500 dark:text-slate-400 text-sm uppercase tracking-wide">
+              <span className="text-left text-slate-500 :text-slate-400 text-sm uppercase tracking-wide">
                 Categories
               </span>
               <div className="flex flex-col gap-2 pl-2 max-h-48 overflow-y-auto">
@@ -321,7 +321,7 @@ export default function Header({
               Seller Hub
             </button>
 
-            <div className="border-t dark:border-slate-800 pt-4">
+            <div className="border-t :border-slate-800 pt-4">
               {loggedInUser ? (
                 <button
                   className="text-left flex items-center gap-2"
