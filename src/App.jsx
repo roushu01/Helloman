@@ -393,10 +393,7 @@ if (isResetPassword) {
               {/* Left filter panel */}
               
               <div className="lg:col-span-3">
-                  <span className="text-lg ml-5 font-bold text-slate-900  tracking-tight">Products</span>
-                    <p className="text-md text-slate-400 ml-5">
-                      {filteredProducts.length} items
-                    </p>
+                 
                 <SidebarFilters
                   selectedCategory={selectedCategory}
                   setSelectedCategory={setSelectedCategory}
@@ -648,6 +645,10 @@ if (isResetPassword) {
           <div className="max-w-7xl mx-auto px-4 md:px-8 pt-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
             {/* Left filter panel */}
             <div className="lg:col-span-3">
+                <span className="text-lg ml-5 font-bold text-slate-900  tracking-tight">Products</span>
+                    <p className="text-md text-slate-400 ml-5">
+                      {filteredProducts.length} items
+                    </p>
               <SidebarFilters
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
