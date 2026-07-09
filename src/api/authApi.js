@@ -43,7 +43,7 @@ export const forgotPassword = async (email) => {
     console.log(error);
     throw error;
   }
-}
+
 };
 export const resetPassword = async (token, password) => {
   const res = await api.patch(
@@ -54,8 +54,7 @@ export const resetPassword = async (token, password) => {
   );
 
   return res.data;
-<<<<<<< HEAD
+
 };
-=======
-};
->>>>>>> a23d907823030961ce9f1239095efc4d44219357
+
+
