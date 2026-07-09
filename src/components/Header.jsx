@@ -82,7 +82,7 @@ export default function Header({
 
           {/* Desktop Nav Links */}
           <nav
-            className="hidden lg:flex items-center gap-5 text-sm font-medium  text-slate-600 dark:text-slate-300 ml-2 md:ml-4"
+            className="hidden lg:flex items-center gap-5 text-md font-medium  text-slate-600 dark:text-slate-300 ml-2 md:ml-4"
         
           >
         
