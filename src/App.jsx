@@ -393,6 +393,10 @@ if (isResetPassword) {
               {/* Left filter panel */}
               
               <div className="lg:col-span-3">
+                  <span className="text-lg ml-5 font-bold text-slate-900  tracking-tight">Products</span>
+                    <p className="text-md text-slate-400 ml-5">
+                      {filteredProducts.length} items
+                    </p>
                 <SidebarFilters
                   selectedCategory={selectedCategory}
                   setSelectedCategory={setSelectedCategory}
@@ -657,16 +661,10 @@ if (isResetPassword) {
             </div>
 
             {/* Right products grid */}
-            <div className="lg:col-span-9 flex flex-col gap-6">
+            <div className="lg:col-span-9 ml-5 flex flex-col gap-6">
               {/* Header */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-150 pb-5">
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900  tracking-tight">
-                    HelloMem Catalog
-                  </h2>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Showing {filteredProducts.length} premium products in {appliedFilters.category}
-                  </p>
                 </div>
 
                 {/* Grid vs List & Sort */}
