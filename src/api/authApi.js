@@ -45,7 +45,7 @@ export const forgotPassword = async (email) => {
 }
 };
 export const resetPassword = async (token, password) => {
-  const res = await api.put(
+  const res = await api.patch(
     `/api/auth/reset-password/${token}`,
     {
       password,
