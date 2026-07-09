@@ -31,7 +31,7 @@ export const signup = async (data) => {
 };
 export const forgotPassword = async (email) => {
   try{  
-  const { data } = await API.post("/api/auth/forgot-password", {
+  const { data } = await api.post("/api/auth/forgot-password", {
     email,
   });
 
