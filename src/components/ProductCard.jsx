@@ -8,7 +8,7 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
   return (
     <div
       onClick={() => onViewDetails(product._id)}
-      className="group bg-white   rounded-2xl ml-5 overflow-hidden shadow-sm hover:shadow-xl hover:border-orange-200  transition-all duration-300 flex flex-col h-full cursor-pointer relative"
+      className="group bg-white dark:bg-slate-900  rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:border-orange-200 dark:hover:border-orange-950/30 transition-all duration-300 flex flex-col h-full cursor-pointer relative"
       id={`product-card-${product._id}`}
     >
       {/* Product Image Area */}

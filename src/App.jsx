@@ -15,7 +15,10 @@ import SignupPage from "./components/SignupModel";
 import Profile from "./components/ProfileView";
 import { addToCart,getCart, updateCart,deleteCartItem} from "./api/cartApi";
 import ResetPassword from "./components/ResetPassword";
+<<<<<<< HEAD
 import SellerDashboard from "./seller/SellerDashboard";
+=======
+>>>>>>> a23d907823030961ce9f1239095efc4d44219357
 import {resetPassword} from "./api/authApi";
 import { getProducts } from "./api/ProductApi";
 
@@ -28,6 +31,7 @@ export default function App() {
     const resetToken = isResetPassword
       ? path.split("/reset-password/")[1]
       : "";
+<<<<<<< HEAD
 
 
       //Seller login
@@ -39,6 +43,8 @@ export default function App() {
           alert("You are not authorized to access the seller dashboard.");
         }
       };
+=======
+>>>>>>> a23d907823030961ce9f1239095efc4d44219357
   // Navigation & View State
  
   const [currentView, setView] = useState("home"); // "home", "products", "about", "contact", "seller"
@@ -407,6 +413,7 @@ if (isResetPassword) {
               {/* Left filter panel */}
               
               <div className="lg:col-span-3">
+                 
                 <SidebarFilters
                   selectedCategory={selectedCategory}
                   setSelectedCategory={setSelectedCategory}
@@ -660,10 +667,17 @@ if (isResetPassword) {
               
             
             <div className="lg:col-span-3">
+<<<<<<< HEAD
               <span className="text-lg ml-5 font-bold text-slate-900  tracking-tight">Products</span>
               <p className="text-md text-slate-400 ml-5">
                 {filteredProducts.length} items
               </p>
+=======
+                <span className="text-lg ml-5 font-bold text-slate-900  tracking-tight">Products</span>
+                    <p className="text-md text-slate-400 ml-5">
+                      {filteredProducts.length} items
+                    </p>
+>>>>>>> a23d907823030961ce9f1239095efc4d44219357
               <SidebarFilters
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
@@ -677,10 +691,18 @@ if (isResetPassword) {
             </div>
 
             {/* Right products grid */}
+<<<<<<< HEAD
             <div className="ml-5 lg:col-span-9 flex flex-col gap-6">
               {/* Header */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-150 pb-5">
                <div></div>
+=======
+            <div className="lg:col-span-9 ml-5 flex flex-col gap-6">
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-150 pb-5">
+                <div>
+                </div>
+>>>>>>> a23d907823030961ce9f1239095efc4d44219357
 
                 {/* Grid vs List & Sort */}
                 <div className="flex items-center gap-3">

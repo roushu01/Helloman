@@ -36,11 +36,13 @@ export const forgotPassword = async (email) => {
   });
 
   return data;
-}catch (error) {
-  console.log("Status:", error.response?.status);
-  console.log("Data:", error.response?.data);
-  console.log("URL:", error.config?.url);
-  console.log(error);
+  } catch (error) {
+    console.log("Status:", error.response?.status);
+    console.log("Data:", error.response?.data);
+    console.log("URL:", error.config?.url);
+    console.log(error);
+    throw error;
+  }
 }
 };
 export const resetPassword = async (token, password) => {
@@ -52,4 +54,8 @@ export const resetPassword = async (token, password) => {
   );
 
   return res.data;
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> a23d907823030961ce9f1239095efc4d44219357
