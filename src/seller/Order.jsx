@@ -10,6 +10,11 @@ import {
 export default function Orders() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [searchType, setSearchType] = useState("orderId");
+  const [orderId, setOrderId] = useState("");
+  const [orderDate, setOrderDate] = useState("");
+  const [productName, setProductName] = useState("");
+  const [userName, setUserName] = useState("");
 
   const [orders, setOrders] = useState([
     {
@@ -73,20 +78,36 @@ export default function Orders() {
   };
 
   const filteredOrders = orders.filter((order) => {
-    const matchSearch =
-      order.customer
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
-      order._id
-        .toLowerCase()
-        .includes(search.toLowerCase());
+    const matchOrderId =
+      orderId === "" ||
+      order._id.toLowerCase().includes(orderId.toLowerCase());
+
+    const matchUser =
+      userName === "" ||
+      order.customer.toLowerCase().includes(userName.toLowerCase());
+
+    const matchProduct =
+      productName === "" ||
+      order.products.some((product) =>
+        product.name.toLowerCase().includes(productName.toLowerCase())
+      );
+
+    const matchDate =
+      orderDate === "" ||
+      new Date(order.date).toISOString().slice(0, 10) === orderDate;
 
     const matchStatus =
       statusFilter === "All" ||
       order.status === statusFilter;
 
-    return matchSearch && matchStatus;
-  });
+    return (
+      matchOrderId &&
+      matchUser &&
+      matchProduct &&
+      matchDate &&
+      matchStatus
+    );
+    });
 
   return (
     <div className="space-y-6">
@@ -110,41 +131,91 @@ export default function Orders() {
       </div>
 
       {/* Search */}
+      <div className="bg-white rounded-xl shadow p-6">
+      <div className="grid grid-cols-1  md:grid-cols-6 gap-4 items-end">
 
-      <div className="flex gap-4">
-
-        <div className="relative flex-1">
-
-          <Search
-            className="absolute left-3 top-3 text-gray-400"
-            size={18}
-          />
-
+        {/* Order ID */}
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            Order ID
+          </label>
           <input
-            value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
-            placeholder="Search Order ID or Customer"
-            className="w-full pl-10 p-3 rounded-lg border"
+            type="text"
+            value={orderId}
+            onChange={(e) => setOrderId(e.target.value)}
+            placeholder="Enter Order ID"
+            className="w-full border rounded-lg px-4 py-2.5"
           />
-
         </div>
 
-        <select
-          value={statusFilter}
-          onChange={(e) =>
-            setStatusFilter(e.target.value)
-          }
-          className="border rounded-lg px-4"
-        >
-          <option>All</option>
-          <option>Pending</option>
-          <option>Confirmed</option>
-          <option>Shipped</option>
-          <option>Delivered</option>
-        </select>
+        {/* Order Date */}
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            Order Date
+          </label>
+          <input
+            type="date"
+            value={orderDate}
+            onChange={(e) => setOrderDate(e.target.value)}
+            className="w-full border rounded-lg px-4 py-2.5"
+          />
+        </div>
 
+        {/* Product Name */}
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            Product Name
+          </label>
+          <input
+            type="text"
+            value={productName}
+            onChange={(e) => setProductName(e.target.value)}
+            placeholder="Enter Product Name"
+            className="w-full border rounded-lg px-4 py-2.5"
+          />
+        </div>
+
+        {/* User Name */}
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            User Name
+          </label>
+          <input
+            type="text"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            placeholder="Enter User Name"
+            className="w-full border rounded-lg px-4 py-2.5"
+          />
+        </div>
+
+        {/* Status */}
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            Status
+          </label>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full border rounded-lg px-4 py-2.5"
+          >
+            <option>All</option>
+            <option>Pending</option>
+            <option>Confirmed</option>
+            <option>Shipped</option>
+            <option>Delivered</option>
+          </select>
+        </div>
+
+        {/* Search Button */}
+        <button
+          className="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-2.5 rounded-lg transition"
+        >
+          <Search size={18} />
+          Search
+        </button>
+
+      </div>
       </div>
 
       {/* Table */}

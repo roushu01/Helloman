@@ -70,63 +70,8 @@ const handleLogin = (e) => {
    
         <>
           {/* Intro header with statistics */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="flex flex-col gap-6">
-              <span className="text-xs font-bold tracking-widest text-orange-500 uppercase flex items-center gap-1.5">
-                <Store className="w-4 h-4 text-orange-500" />
-                <span>Seller Portal</span>
-              </span>
-              <h1 className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white leading-tight">
-                Grow your business in Jaipur with HelloMem
-              </h1>
-              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                Are you a local designer, artisan, manufacturer, or shop owner in Jaipur? Sell your clothes, footwear, home decors, or accessories directly to local and national consumers. We provide free photoshoot guides, automated pickup logistics, and zero middle-men fees!
-              </p>
-
-              {/* Perks grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-2">
-                <div className="flex gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-orange-50 dark:bg-orange-950/20 text-orange-500 flex items-center justify-center shrink-0">
-                    <DollarSign className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">0% Commission</h3>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Keep 100% of your listed earnings without hidden platform fees.</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/20 text-blue-500 flex items-center justify-center shrink-0">
-                    <Users className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">15K+ Active Buyers</h3>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Instant exposure to loyal customers looking for premium Jaipur styles.</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-950/20 text-green-500 flex items-center justify-center shrink-0">
-                    <ShieldCheck className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Reliable Logistics</h3>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Our pickup partner collects packages directly from your warehouse.</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-pink-50 dark:bg-pink-950/20 text-pink-500 flex items-center justify-center shrink-0">
-                    <Award className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Direct Weekly Payout</h3>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Funds settled into your verified bank account every single Tuesday.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+          <div className="flex justify-center  items-center">
+           
             {/* Auth card */}
             <div className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-sm">
               {/* Login / Sign Up Tabs */}

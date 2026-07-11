@@ -1,82 +1,95 @@
-// src/seller/Products.jsx
+import React, { useState } from "react";
+import { Search, RotateCcw, Plus, Pencil, Trash2 } from "lucide-react";
+import AddProductModal from "./AddProductModal";
+import { useNavigate } from "react-router-dom";
 
-import { useEffect, useState } from "react";
-import {
-  Search,
-  Pencil,
-  Trash2,
-  Plus,
-} from "lucide-react";
+export default function Products() {
 
-export default function Products({
-  setActivePage,
-  setSelectedProduct,
-}) {
-  const [products, setProducts] = useState([]);
-  const [search, setSearch] = useState("");
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    // Dummy Data
-    setProducts([
-      {
-        _id: "1",
-        name: "Nike Air Max 270",
-        category: "Shoes",
-        price: 8999,
-        stock: 12,
-        sold: 35,
-        image:
-          "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500",
-      },
-      {
-        _id: "2",
-        name: "Apple Watch Series 9",
-        category: "Electronics",
-        price: 39999,
-        stock: 4,
-        sold: 18,
-        image:
-          "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500",
-      },
-      {
-        _id: "3",
-        name: "Laptop Backpack",
-        category: "Bags",
-        price: 2499,
-        stock: 0,
-        sold: 56,
-        image:
-          "https://images.unsplash.com/photo-1581605405669-fcdf81165afa?w=500",
-      },
-    ]);
-  }, []);
+  const [filters, setFilters] = useState({
+    productId: "",
+    productName: "",
+    category: "",
+    status: "",
+    fromDate: "",
+    toDate: "",
+  });
 
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const [products] = useState([
+    {
+      id: "P001",
+      name: "Nike Air Max",
+      category: "Shoes",
+      price: 4999,
+      stock: 45,
+      status: "Active",
+    },
+    {
+      id: "P002",
+      name: "Leather Wallet",
+      category: "Accessories",
+      price: 999,
+      stock: 20,
+      status: "Inactive",
+    },
+    {
+      id: "P003",
+      name: "Wireless Earbuds",
+      category: "Electronics",
+      price: 2999,
+      stock: 35,
+      status: "Active",
+    },
+  ]);
 
-  const handleDelete = (id) => {
-    if (window.confirm("Delete this product?")) {
-      setProducts(products.filter((item) => item._id !== id));
-    }
+  const filteredProducts = products.filter((product) => {
+    return (
+      product.id
+        .toLowerCase()
+        .includes(filters.productId.toLowerCase()) &&
+      product.name
+        .toLowerCase()
+        .includes(filters.productName.toLowerCase()) &&
+      (filters.category === "" ||
+        product.category === filters.category) &&
+      (filters.status === "" ||
+        product.status === filters.status)
+    );
+  });
+
+  const resetFilters = () => {
+    setFilters({
+      productId: "",
+      productName: "",
+      category: "",
+      status: "",
+      fromDate: "",
+      toDate: "",
+    });
   };
 
   return (
-    <div>
+    <div className="space-y-6">
 
       {/* Header */}
 
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center">
 
-        <h1 className="text-3xl font-bold">
-          Products
-        </h1>
+        <div>
+          <h1 className="text-3xl font-bold">
+            Products
+          </h1>
 
-        <button
-          onClick={() => setActivePage("add-product")}
-          className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-3 rounded-lg flex items-center gap-2"
+          <p className="text-gray-500">
+            Manage your products
+          </p>
+        </div>
+
+       <button
+          onClick={() => navigate("/seller/add-product")}
+          className="bg-orange-500 text-white px-5 py-2 rounded-lg"
         >
-          <Plus size={18} />
           Add Product
         </button>
 
@@ -84,20 +97,144 @@ export default function Products({
 
       {/* Search */}
 
-      <div className="relative mb-6 w-full md:w-96">
+      <div className="bg-white rounded-xl shadow p-6">
 
-        <Search
-          size={18}
-          className="absolute left-3 top-3 text-gray-400"
-        />
+        <div className="grid md:grid-cols-4 gap-5">
 
-        <input
-          type="text"
-          placeholder="Search Product..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full border rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-        />
+          <div>
+            <label className="text-sm font-medium">
+              Product ID
+            </label>
+
+            <input
+              className="w-full border rounded-lg p-3 mt-1"
+              value={filters.productId}
+              onChange={(e) =>
+                setFilters({
+                  ...filters,
+                  productId: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">
+              Product Name
+            </label>
+
+            <input
+              className="w-full border rounded-lg p-3 mt-1"
+              value={filters.productName}
+              onChange={(e) =>
+                setFilters({
+                  ...filters,
+                  productName: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">
+              Category
+            </label>
+
+            <select
+              className="w-full border rounded-lg p-3 mt-1"
+              value={filters.category}
+              onChange={(e) =>
+                setFilters({
+                  ...filters,
+                  category: e.target.value,
+                })
+              }
+            >
+              <option value="">All</option>
+              <option>Shoes</option>
+              <option>Electronics</option>
+              <option>Accessories</option>
+              <option>Fashion</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">
+              Status
+            </label>
+
+            <select
+              className="w-full border rounded-lg p-3 mt-1"
+              value={filters.status}
+              onChange={(e) =>
+                setFilters({
+                  ...filters,
+                  status: e.target.value,
+                })
+              }
+            >
+              <option value="">All</option>
+              <option>Active</option>
+              <option>Inactive</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">
+              From Date
+            </label>
+
+            <input
+              type="date"
+              className="w-full border rounded-lg p-3 mt-1"
+              value={filters.fromDate}
+              onChange={(e) =>
+                setFilters({
+                  ...filters,
+                  fromDate: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">
+              To Date
+            </label>
+
+            <input
+              type="date"
+              className="w-full border rounded-lg p-3 mt-1"
+              value={filters.toDate}
+              onChange={(e) =>
+                setFilters({
+                  ...filters,
+                  toDate: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          <div className="flex items-end gap-3 col-span-2 justify-end">
+
+            <button
+              onClick={resetFilters}
+              className="px-5 py-3 border rounded-lg flex items-center gap-2"
+            >
+              <RotateCcw size={18} />
+              Reset
+            </button>
+
+            <button
+              className="px-6 py-3 bg-orange-500 text-white rounded-lg flex items-center gap-2"
+            >
+              <Search size={18} />
+              Search
+            </button>
+
+          </div>
+
+        </div>
 
       </div>
 
@@ -111,37 +248,13 @@ export default function Products({
 
             <tr>
 
-              <th className="p-4 text-left">
-                Image
-              </th>
-
-              <th className="text-left">
-                Product
-              </th>
-
-              <th>
-                Category
-              </th>
-
-              <th>
-                Price
-              </th>
-
-              <th>
-                Stock
-              </th>
-
-              <th>
-                Sold
-              </th>
-
-              <th>
-                Status
-              </th>
-
-              <th>
-                Actions
-              </th>
+              <th className="p-4 text-left">ID</th>
+              <th className="p-4 text-left">Product</th>
+              <th className="p-4 text-left">Category</th>
+              <th className="p-4 text-left">Price</th>
+              <th className="p-4 text-left">Stock</th>
+              <th className="p-4 text-left">Status</th>
+              <th className="p-4 text-center">Action</th>
 
             </tr>
 
@@ -152,83 +265,52 @@ export default function Products({
             {filteredProducts.map((product) => (
 
               <tr
-                key={product._id}
-                className="border-b hover:bg-gray-50"
+                key={product.id}
+                className="border-t hover:bg-gray-50"
               >
 
-                <td className="p-4">
+                <td className="p-4">{product.id}</td>
 
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-16 h-16 rounded-lg object-cover"
-                  />
-
-                </td>
-
-                <td className="font-semibold">
+                <td className="p-4 font-medium">
                   {product.name}
                 </td>
 
-                <td>
+                <td className="p-4">
                   {product.category}
                 </td>
 
-                <td>
-                  ₹{product.price.toLocaleString()}
+                <td className="p-4">
+                  ₹{product.price}
                 </td>
 
-                <td>
+                <td className="p-4">
                   {product.stock}
                 </td>
 
-                <td>
-                  {product.sold}
-                </td>
+                <td className="p-4">
 
-                <td>
-
-                  {product.stock > 5 ? (
-
-                    <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
-                      In Stock
-                    </span>
-
-                  ) : product.stock > 0 ? (
-
-                    <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">
-                      Low Stock
-                    </span>
-
-                  ) : (
-
-                    <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm">
-                      Out of Stock
-                    </span>
-
-                  )}
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      product.status === "Active"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {product.status}
+                  </span>
 
                 </td>
 
-                <td>
+                <td className="p-4">
 
-                  <div className="flex justify-center gap-3">
+                  <div className="flex justify-center gap-2">
 
-                    <button
-                      onClick={() => {
-                        setSelectedProduct(product);
-                        setActivePage("edit-product");
-                      }}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      <Pencil size={20} />
+                    <button className="p-2 bg-blue-100 rounded-lg hover:bg-blue-200">
+                      <Pencil size={18} />
                     </button>
 
-                    <button
-                      onClick={() => handleDelete(product._id)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <Trash2 size={20} />
+                    <button className="p-2 bg-red-100 rounded-lg hover:bg-red-200">
+                      <Trash2 size={18} />
                     </button>
 
                   </div>
@@ -244,6 +326,8 @@ export default function Products({
         </table>
 
       </div>
+
+   
 
     </div>
   );
