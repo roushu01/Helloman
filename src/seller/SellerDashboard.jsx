@@ -11,8 +11,9 @@ import Orders from "./Order";
 import Revenue from "./Revenue";
 import Analytics from "./Analytics";
 import Profile from "./Profile";
-import AddProduct from "./AddProducts";
-import EditProduct from "./EditProduct";
+import AddProduct from "./AddProduct";
+import ProductReviews from "./ProductReviews";
+import BulkUpload from "./BulkUpload";
 
 export default function SellerDashboard() {
   const [activePage, setActivePage] = useState("dashboard");
@@ -45,7 +46,10 @@ export default function SellerDashboard() {
             setActivePage={setActivePage}
           />
         );
-
+      case "bulk-upload":
+        return <BulkUpload />;  
+      case "product-reviews":
+        return <ProductReviews />;
       case "orders":
         return <Orders />;
 

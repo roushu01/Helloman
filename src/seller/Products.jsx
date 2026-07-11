@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Search, RotateCcw, Plus, Pencil, Trash2 } from "lucide-react";
-import AddProductModal from "./AddProductModal";
-// import { useNavigate } from "react-router-dom";
 
-export default function Products() {
 
-  const navigate = useNavigate();
+
+export default function Products({
+  setActivePage,
+  setSelectedProduct,
+}) {
+
 
   const [filters, setFilters] = useState({
     productId: "",
@@ -85,9 +87,8 @@ export default function Products() {
             Manage your products
           </p>
         </div>
-
-       <button
-          onClick={() => navigate("/seller/add-product")}
+        <button
+          onClick={() => setActivePage("add-product")}
           className="bg-orange-500 text-white px-5 py-2 rounded-lg"
         >
           Add Product
@@ -305,9 +306,15 @@ export default function Products() {
 
                   <div className="flex justify-center gap-2">
 
-                    <button className="p-2 bg-blue-100 rounded-lg hover:bg-blue-200">
-                      <Pencil size={18} />
-                    </button>
+                    <button
+                        onClick={() => {
+                          setSelectedProduct(product);
+                          setActivePage("edit-product");
+                        }}
+                        className="p-2 bg-blue-100 rounded-lg hover:bg-blue-200"
+                      >
+                        <Pencil size={18} />
+                      </button>
 
                     <button className="p-2 bg-red-100 rounded-lg hover:bg-red-200">
                       <Trash2 size={18} />
