@@ -30,7 +30,7 @@ export default function HeroCarousel() {
   };
 
   return (
-    <section className="relative p-2 py-2 w-full h-[420px] sm:h-[450px] md:h-[520px] overflow-hidden">
+    <section className="relative p-2 mt-10 w-full h-[520px] sm:h-[550px] md:h-[520px] overflow-hidden">
 
       {/* Images */}
       <div className="relative w-full h-full">

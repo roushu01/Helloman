@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Search, RotateCcw, Plus, Pencil, Trash2 } from "lucide-react";
 import AddProductModal from "./AddProductModal";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 export default function Products() {
 
