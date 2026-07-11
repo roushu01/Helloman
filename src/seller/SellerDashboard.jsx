@@ -14,11 +14,21 @@ import Profile from "./Profile";
 import AddProduct from "./AddProduct";
 import ProductReviews from "./ProductReviews";
 import BulkUpload from "./BulkUpload";
+import ProductVariants from "./ProductVariants";
+import Users from "./Users";
+import AddUser from "./AddUser";
+import Countries from "./Countries";
+import AddCountries from "./AddCountries";
+import States from "./States";
+import AddStates from "./AddStates";
+import Cities from "./Cities";
+import AddCities from "./AddCities";
 
 export default function SellerDashboard() {
   const [activePage, setActivePage] = useState("dashboard");
   const [selectedProduct, setSelectedProduct] = useState(null);
-
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState(null);
   const renderPage = () => {
     switch (activePage) {
       case "dashboard":
@@ -52,15 +62,64 @@ export default function SellerDashboard() {
         return <ProductReviews />;
       case "orders":
         return <Orders />;
-
+      case "add-user":
+        return (
+          <AddUser
+            setActivePage={setActivePage}
+          />
+        );
       case "revenue":
         return <Revenue />;
-
+      case "users":
+        return (
+          <Users
+            setActivePage={setActivePage}
+            setSelectedUser={setSelectedUser}
+          />
+        );
+      case "countries":
+        return (
+          <Countries
+            setActivePage={setActivePage}
+            setSelectedCountry={setSelectedCountry}
+          />
+        );
+      case "add-country":
+        return (    
+      <AddCountries
+        setActivePage={setActivePage}
+      />
+    );  
+      case "states":
+        return (
+          <States
+            setActivePage={setActivePage}
+          />
+        );
+      case "add-state":
+        return (
+          <AddStates
+            setActivePage={setActivePage}
+          />
+        );
       case "analytics":
         return <Analytics />;
-
+      case "cities":
+        return (
+          <Cities
+            setActivePage={setActivePage}
+          />
+        );
+      case "add-city":
+        return (
+          <AddCities
+            setActivePage={setActivePage}
+          />
+        );
       case "profile":
         return <Profile />;
+      case "product-variants":
+        return <ProductVariants />;  
 
       default:
         return <DashboardHome />;

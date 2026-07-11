@@ -78,6 +78,9 @@ export default function Sidebar({ activePage, setActivePage }) {
     icon: Users,
     children: [
       { title: "Users", value: "users" },
+      {title:"Countries",value:"countries"},
+      {title:"States",value:"states"},
+      {title:"Cities",value:"cities"},
     ],
   },
 
