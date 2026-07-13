@@ -23,6 +23,14 @@ import States from "./States";
 import AddStates from "./AddStates";
 import Cities from "./Cities";
 import AddCities from "./AddCities";
+import Banks from "./Banks";
+import AddBanks from "./AddBanks";
+import UserBanks from "./UserBank";
+import AddUserBank from "./AddUserBank";
+import VendorPayments from "./VendorPayments";
+import VendorCommission from "./VendorCommission";
+import AddVendorPayments from "./AddVendorPayment"
+import AddVendorCommission from "./AddVendorCommission";
 
 export default function SellerDashboard() {
   const [activePage, setActivePage] = useState("dashboard");
@@ -60,6 +68,23 @@ export default function SellerDashboard() {
         return <BulkUpload />;  
       case "product-reviews":
         return <ProductReviews />;
+      case "banks":
+        return <Banks setActivePage={setActivePage}/> ;
+      case "add-bank":
+        return <AddBanks setActivePage={setActivePage}/>
+      case "vendor-payment":
+        return <VendorPayments setActivePage={setActivePage}/>  
+      case "add-vendor-payment":
+        return <AddVendorPayments setActivePage={setActivePage}/>  
+      case "vendor-commission":
+        return <VendorCommission setActivePage={setActivePage}/>  
+      case "add-vendor-commission":
+        return <AddVendorCommission setActivePage={setActivePage}/>    
+      
+      case "user-bank":
+        return <UserBanks setActivePage={setActivePage}/> ;
+      case "add-user-bank":
+        return <AddUserBank setActivePage={setActivePage}/>    
       case "orders":
         return <Orders />;
       case "add-user":
