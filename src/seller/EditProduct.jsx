@@ -1,24 +1,23 @@
 import React, { useState } from "react";
 import { Save, ArrowLeft } from "lucide-react";
 
-export default function EditProduct() {
+export default function EditProduct({product,setActivePage}) {
 
   // Dummy product (Later fetch from backend)
 
-  const [product, setProduct] = useState({
-    name: "Nike Air Max 270",
-    description:
-      "Comfortable running shoes with premium cushioning.",
-    category: "Shoes",
-    price: 8999,
-    stock: 20,
-    image:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500",
-  });
+  const [formData, setFormData] = useState({
+  name: "Nike Air Max 270",
+  description: "Comfortable running shoes with premium cushioning.",
+  category: "Shoes",
+  price: 8999,
+  stock: 20,
+  image:
+    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500",
+});
 
   const handleChange = (e) => {
-    setProduct({
-      ...product,
+    setformData({
+      ...formData,
       [e.target.name]: e.target.value,
     });
   };
@@ -48,6 +47,7 @@ export default function EditProduct() {
 
         <button
           className="flex items-center gap-2 border px-4 py-2 rounded-lg hover:bg-gray-100"
+          onClick={() => setActivePage("products")}
         >
           <ArrowLeft size={18} />
           Back
@@ -69,7 +69,7 @@ export default function EditProduct() {
           </label>
 
           <img
-            src={product.image}
+            src={formData.image}
             alt=""
             className="w-48 h-48 object-cover rounded-xl border"
           />
@@ -92,7 +92,7 @@ export default function EditProduct() {
           <input
             type="text"
             name="name"
-            value={product.name}
+            value={formData.name}
             onChange={handleChange}
             className="w-full border rounded-lg p-3"
           />
@@ -110,7 +110,7 @@ export default function EditProduct() {
           <textarea
             rows={5}
             name="description"
-            value={product.description}
+            value={formData.description}
             onChange={handleChange}
             className="w-full border rounded-lg p-3"
           />
@@ -127,7 +127,7 @@ export default function EditProduct() {
 
           <select
             name="category"
-            value={product.category}
+            value={formData.category}
             onChange={handleChange}
             className="w-full border rounded-lg p-3"
           >
@@ -152,7 +152,7 @@ export default function EditProduct() {
             <input
               type="number"
               name="price"
-              value={product.price}
+              value={formData.price}
               onChange={handleChange}
               className="w-full border rounded-lg p-3"
             />
@@ -168,7 +168,7 @@ export default function EditProduct() {
             <input
               type="number"
               name="stock"
-              value={product.stock}
+              value={formData.stock}
               onChange={handleChange}
               className="w-full border rounded-lg p-3"
             />

@@ -9,13 +9,47 @@ import {
 
 import { getCart } from "../api/cartApi";
 import {getOrders} from "../api/OrderApi";
+import { addReview } from "../api/reviewApi";
 
 export default function Profile({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState("orders");
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
-const [orderLoading, setOrderLoading] = useState(false);
+  const [orderLoading, setOrderLoading] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+
+  const [review, setReview] = useState({
+    rating: 5,
+    comment: "",
+  });
+  const handleReviewSubmit = async () => {
+  try {
+    const res = await addReview({
+      productId: selectedProductId,
+      rating: review.rating,
+      comment: review.comment,
+    });
+
+    alert(res.message || "Review added");
+
+    setShowReviewModal(false);
+
+    setReview({
+      rating: 5,
+      comment: "",
+    });
+
+  } catch (err) {
+    console.error(err);
+
+    alert(
+      err.response?.data?.message ||
+      "Unable to submit review"
+    );
+  }
+};
   const fetchCart = async () => {
   try {
     setLoading(true);
@@ -214,6 +248,15 @@ useEffect(() => {
                 ₹{order.pricing.total.toLocaleString("en-IN")}
               </span>
             </div>
+            <button
+            onClick={() => {
+              setSelectedProductId(item.product);
+              setShowReviewModal(true);
+            }}
+            className="mt-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg"
+          >
+            Write Review
+          </button>
           </div>
         ))}
       </div>
@@ -264,7 +307,72 @@ useEffect(() => {
         </div>
 
       </div>
+      {showReviewModal && (
+  <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+    <div className="bg-white rounded-xl p-6 w-[420px]">
 
+      <h2 className="text-xl font-bold mb-5">
+        Write Review
+      </h2>
+
+      <label className="font-medium">
+        Rating
+      </label>
+
+      <select
+        className="w-full border rounded-lg p-3 mt-2 mb-5"
+        value={review.rating}
+        onChange={(e) =>
+          setReview({
+            ...review,
+            rating: Number(e.target.value),
+          })
+        }
+      >
+        <option value={5}>5 ⭐</option>
+        <option value={4}>4 ⭐</option>
+        <option value={3}>3 ⭐</option>
+        <option value={2}>2 ⭐</option>
+        <option value={1}>1 ⭐</option>
+      </select>
+
+      <label className="font-medium">
+        Comment
+      </label>
+
+      <textarea
+        rows={5}
+        className="w-full border rounded-lg p-3 mt-2"
+        value={review.comment}
+        onChange={(e) =>
+          setReview({
+            ...review,
+            comment: e.target.value,
+          })
+        }
+      />
+
+      <div className="flex justify-end gap-3 mt-6">
+
+        <button
+          onClick={() => setShowReviewModal(false)}
+          className="px-5 py-2 border rounded-lg"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleReviewSubmit}
+          className="px-5 py-2 bg-orange-500 text-white rounded-lg"
+        >
+          Submit Review
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
     </div>
   );
 }

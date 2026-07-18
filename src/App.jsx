@@ -228,8 +228,7 @@ const fetchCart = async () => {
     setCurrentPage(1);
     showNotification("All filters reset.");
   };
-
- const handleViewDetails = (id) => {
+const handleViewDetails = (id) => {
   console.log("Clicked:", id);
 
   const prod = products.find((p) => p._id === id);
@@ -864,6 +863,7 @@ if (isResetPassword) {
               setView("home");
               setSelectedProduct(null);
             }}
+             
             onAddToCart={(product, quantity) => handleAddToCart(product, quantity)}
             
           />

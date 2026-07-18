@@ -1,6 +1,6 @@
 // src/seller/ProductVariants.jsx
 
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import {
   Search,
   RotateCcw,
@@ -8,8 +8,8 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-
-export default function ProductVariants() {
+import { getSellerProducts } from "../api/ProductApi"; 
+export default function ProductVariants({setActivePage}) {
 
   const [filters, setFilters] = useState({
     productName: "",
@@ -18,38 +18,47 @@ export default function ProductVariants() {
     status: "",
   });
 
-  const [variants] = useState([
-    {
-      id: "V001",
-      product: "Nike Air Max",
-      color: "Black",
-      size: "8",
-      sku: "NK-BLK-8",
-      price: 4999,
-      stock: 20,
-      status: "Active",
-    },
-    {
-      id: "V002",
-      product: "Nike Air Max",
-      color: "White",
-      size: "9",
-      sku: "NK-WHT-9",
-      price: 4999,
-      stock: 15,
-      status: "Active",
-    },
-    {
-      id: "V003",
-      product: "Wireless Earbuds",
-      color: "Blue",
-      size: "-",
-      sku: "WB-BLU",
-      price: 2999,
-      stock: 35,
-      status: "Inactive",
-    },
-  ]);
+ const [variants, setVariants] = useState([]);
+const [loading, setLoading] = useState(true);
+    useEffect(() => {
+  fetchProducts();
+}, []);
+
+const fetchProducts = async () => {
+  try {
+    const data = await getSellerProducts();
+
+    console.log(data);
+
+    const products = data.products || data;
+
+    const allVariants = [];
+
+    products.forEach((product) => {
+      if (product.variants?.colors?.length) {
+        product.variants.colors.forEach((variant, index) => {
+          allVariants.push({
+            id: `${product._id}-${index}`,
+            product: product.name,
+            color: variant.color || "-",
+            size: variant.size || "-",
+            sku: variant.sku || "-",
+            price: variant.price || product.price,
+            stock: variant.stock || 0,
+            status:
+              variant.stock > 0 ? "Active" : "Inactive",
+          });
+        });
+      }
+    });
+
+    setVariants(allVariants);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const filteredVariants = variants.filter((item) => {
     return (
@@ -95,13 +104,13 @@ export default function ProductVariants() {
 
         </div>
 
-        <button className="bg-orange-500 text-white px-5 py-3 rounded-lg flex items-center gap-2 hover:bg-orange-600">
-
-          <Plus size={18} />
-
-          Add Variant
-
-        </button>
+        <button
+  onClick={() => setActivePage("add-variant")}
+  className="bg-orange-500 text-white px-5 py-3 rounded-lg flex items-center gap-2 hover:bg-orange-600"
+>
+  <Plus size={18} />
+  Add Variant
+</button>
 
       </div>
 

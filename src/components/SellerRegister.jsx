@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import api from "../api/axios";
 import {
   Store,
   ShieldCheck,
@@ -20,50 +21,131 @@ export default function SellerRegister({ onSellerLogin }) {
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
-    fullName: "",
-    shopName: "",
-    gstin: "",
-    phone: "",
-    category: "Bags & Footwear",
-    location: "",
-    password: "",
-  });
+  firstName: "",
+  lastName: "",
+  email: "",
+  password: "",
+  phone: "",
+
+  businessName: "",
+  businessType: "Individual",
+
+  gstNumber: "",
+  panNumber: "",
+
+  address: {
+    street: "",
+    city: "",
+    state: "",
+    country: "India",
+    pincode: "",
+  },
+
+  bankDetails: {
+    accountHolder: "",
+    accountNumber: "",
+    ifsc: "",
+    bankName: "",
+  },
+});
 
   const [loginData, setLoginData] = useState({
-    identifier: "",
+    email: "",
     password: "",
   });
-const handleRegister = (e) => {
+const handleRegister = async (e) => {
   e.preventDefault();
 
- const sellerData = {
-  id: 1,
-  role: "seller",      // <-- add
-  name: formData.fullName,
-  shopName: formData.shopName,
-  phone: formData.phone,
-};
+  const payload = {
+    firstName: formData.firstName,
+    lastName: formData.lastName,
+    email: formData.email,
+    password: formData.password,
+    phone: formData.phone,
 
-onSellerLogin(sellerData);
-};
+    businessName: formData.businessName,
+    businessType: formData.businessType,
 
-const handleLogin = (e) => {
-  e.preventDefault();
+    gstNumber: formData.gstNumber,
+    panNumber: formData.panNumber,
 
-  if (
-    loginData.identifier === "hellomem" &&
-    loginData.password === "123456"
-  ) {
-    onSellerLogin({
-      id: 1,
-      role: "seller",      // <-- add this
-      name: "Roushni Kumari",
-      shopName: "HelloMem Store",
-      email: "hellomem@gmail.com",
-    });
-  } else {
-    alert("Invalid username or password");
+    address: {
+      street: formData.address.street,
+      city: formData.address.city,
+      state: formData.address.state,
+      country: formData.address.country,
+      pincode: formData.address.pincode,
+    },
+
+    bankDetails: {
+      accountHolder: formData.bankDetails.accountHolder,
+      accountNumber: formData.bankDetails.accountNumber,
+      ifsc: formData.bankDetails.ifsc,
+      bankName: formData.bankDetails.bankName,
+    },
+  };
+
+  try {
+    const res = await api.post(
+      "api/sellers/register",
+      payload
+    );
+
+    alert("Seller Registered Successfully");
+
+    console.log(res.data);
+
+  } catch (error) {
+
+    console.log(error);
+
+    alert(
+      error.response?.data?.message ||
+      "Registration Failed"
+    );
   }
+};
+
+
+const handleLogin = async (e) => {
+  e.preventDefault();
+
+  try {
+    const response = await api.post("/api/auth/login", {
+  email: loginData.email,
+  password: loginData.password,
+});
+
+console.log(response.data);
+
+const { token, user } = response.data;
+
+localStorage.setItem("token", token);
+
+onSellerLogin({
+  id: user._id,
+  role: user.role,
+  name: `${user.firstName} ${user.lastName}`,
+  shopName: user.businessName,
+  email: user.email,
+});
+    // Optional: Store token if backend returns one
+    if (user.token) {
+      localStorage.setItem("token", user.token);
+    }
+
+    onSellerLogin({
+      id: user.id,
+      role: user.role,
+      name: `${user.firstName} ${user.lastName}`,
+      shopName: user.businessName,
+      email: user.email,
+    });
+
+  } catch (error) {
+  console.log("Status:", error.response?.status);
+  console.log("Response:", error.response?.data);
+}
 };
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 flex flex-col gap-10" id="seller-register-page">
@@ -73,16 +155,16 @@ const handleLogin = (e) => {
           <div className="flex justify-center  items-center">
            
             {/* Auth card */}
-            <div className="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-sm">
+            <div className="bg-white  p-6 md:p-8 shadow-sm">
               {/* Login / Sign Up Tabs */}
-              <div className="grid grid-cols-2 gap-2 bg-gray-100 dark:bg-slate-800 p-1 rounded-xl mb-6">
+              <div className="grid grid-cols-2 gap-2 bg-gray-100  p-1 rounded-xl mb-6">
                 <button
                   type="button"
                   onClick={() => setAuthMode("login")}
                   className={`text-xs font-black uppercase tracking-wider py-2.5 rounded-lg transition-colors cursor-pointer ${
                     authMode === "login"
-                      ? "bg-white dark:bg-slate-900 text-orange-500 shadow-sm"
-                      : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                      ? "bg-white  text-orange-500 shadow-sm"
+                      : "text-slate-500 hover:text-slate-700 "
                   }`}
                 >
                   Login
@@ -92,8 +174,8 @@ const handleLogin = (e) => {
                   onClick={() => setAuthMode("signup")}
                   className={`text-xs font-black uppercase tracking-wider py-2.5 rounded-lg transition-colors cursor-pointer ${
                     authMode === "signup"
-                      ? "bg-white dark:bg-slate-900 text-orange-500 shadow-sm"
-                      : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                      ? "bg-white  text-orange-500 shadow-sm"
+                      : "text-slate-500  hover:text-slate-700 "
                   }`}
                 >
                   Sign Up
@@ -103,8 +185,8 @@ const handleLogin = (e) => {
               {authMode === "login" ? (
                 /* ---------------- LOGIN FORM ---------------- */
                 <form onSubmit={handleLogin} className="flex flex-col gap-4">
-                  <div className="border-b border-gray-100 dark:border-slate-800 pb-3">
-                    <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                  <div className="border-b border-gray-100  pb-3">
+                    <h3 className="text-base font-black text-slate-900  tracking-wider">
                       Seller Login
                     </h3>
                     <p className="text-xs text-slate-400 mt-1">Welcome back! Access your seller dashboard</p>
@@ -119,10 +201,10 @@ const handleLogin = (e) => {
                       <input
                         type="text"
                         required
-                        value={loginData.identifier}
-                        onChange={(e) => setLoginData({ ...loginData, identifier: e.target.value })}
+                        value={loginData.email}
+                        onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                         placeholder="9829XXXXXX or you@shop.com"
-                        className="w-full text-xs pl-9 pr-3.5 py-2.5 border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-slate-800 dark:text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
+                        className="w-full text-xs pl-9 pr-3.5 py-2.5 border border-gray-200  rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
                       />
                     </div>
                   </div>
@@ -139,12 +221,12 @@ const handleLogin = (e) => {
                         value={loginData.password}
                         onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                         placeholder="••••••••"
-                        className="w-full text-xs pl-9 pr-9 py-2.5 border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-slate-800 dark:text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
+                        className="w-full text-xs pl-9 pr-9 py-2.5 border border-gray-200   rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 "
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -152,7 +234,7 @@ const handleLogin = (e) => {
                   </div>
 
                   <div className="flex justify-between items-center text-[11px]">
-                    <label className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 cursor-pointer">
+                    <label className="flex items-center gap-1.5 text-slate-500  cursor-pointer">
                       <input type="checkbox" className="rounded border-gray-300 text-orange-500 focus:ring-orange-500" />
                       Remember me
                     </label>
@@ -172,7 +254,7 @@ const handleLogin = (e) => {
                     Login to Dashboard
                   </button>
 
-                  <p className="text-center text-[11px] text-slate-500 dark:text-slate-400">
+                  <p className="text-center text-[11px] text-slate-500 ">
                     New seller on HelloMem?{" "}
                     <button
                       type="button"
@@ -185,135 +267,553 @@ const handleLogin = (e) => {
                 </form>
               ) : (
                 /* ---------------- SIGN UP FORM ---------------- */
-                <form onSubmit={handleRegister} className="flex flex-col gap-4">
-                  <div className="border-b border-gray-100 dark:border-slate-800 pb-3">
-                    <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                      Seller Application
-                    </h3>
-                    <p className="text-xs text-slate-400 mt-1">Start selling in Jaipur under 5 minutes</p>
-                  </div>
+               <form onSubmit={handleRegister} className="flex flex-col gap-5">
 
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Contact Full Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.fullName}
-                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      placeholder="e.g. Ramesh Chandra"
-                      className="text-xs px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-slate-800 dark:text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
-                    />
-                  </div>
+  <div className="border-b border-gray-200 pb-3">
+    <h3 className="text-base font-black uppercase tracking-wider">
+      Seller Registration
+    </h3>
 
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Shop / Brand Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.shopName}
-                      onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
-                      placeholder="e.g. Jaipur Royal Clutches"
-                      className="text-xs px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-slate-800 dark:text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
-                    />
-                  </div>
+    <p className="text-xs text-gray-500 mt-1">
+      Complete your seller profile to start selling.
+    </p>
+  </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase">WhatsApp Mobile</label>
-                      <input
-                        type="tel"
-                        required
-                        pattern="[0-9]{10}"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        placeholder="9829XXXXXX"
-                        className="text-xs px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-slate-800 dark:text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase">GSTIN (Optional)</label>
-                      <input
-                        type="text"
-                        value={formData.gstin}
-                        onChange={(e) => setFormData({ ...formData, gstin: e.target.value })}
-                        placeholder="08AAAAA0000A1Z5"
-                        className="text-xs px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-slate-800 dark:text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
-                      />
-                    </div>
-                  </div>
+  {/* PERSONAL INFORMATION */}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase">Primary Category</label>
-                      <select
-                        value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                        className="text-xs px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-slate-800 dark:text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
-                      >
-                        <option value="Bags & Footwear">Bags & Footwear</option>
-                        <option value="Women Ethnic">Women Ethnic</option>
-                        <option value="Women Western">Women Western</option>
-                        <option value="Men">Men</option>
-                        <option value="Home & Kitchen">Home & Kitchen</option>
-                        <option value="Electronics">Electronics</option>
-                      </select>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase">Pickup Location</label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.location}
-                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                        placeholder="Johri Bazaar, Jaipur"
-                        className="text-xs px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-slate-800 dark:text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
-                      />
-                    </div>
-                  </div>
+  <div>
 
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Create Password</label>
-                    <div className="relative">
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                        <Lock className="w-4 h-4" />
-                      </span>
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        required
-                        minLength={6}
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        placeholder="At least 6 characters"
-                        className="w-full text-xs pl-9 pr-9 py-2.5 border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-slate-800 dark:text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
+    <h4 className="font-bold text-orange-500 mb-4">
+      Personal Information
+    </h4>
 
-                  <button
-                    type="submit"
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-extrabold py-3.5 rounded-xl shadow-md transition-all cursor-pointer text-xs uppercase tracking-wider mt-2"
-                  >
-                    Register Shop
-                  </button>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                  <p className="text-center text-[11px] text-slate-500 dark:text-slate-400">
-                    Already a HelloMem seller?{" "}
-                    <button
-                      type="button"
-                      onClick={() => setAuthMode("login")}
-                      className="text-orange-500 font-bold hover:underline cursor-pointer"
-                    >
-                      Login instead
-                    </button>
-                  </p>
-                </form>
+      <div>
+
+        <label className="text-[10px] font-bold uppercase">
+          First Name
+        </label>
+
+        <input
+          type="text"
+          required
+          value={formData.firstName}
+          onChange={(e)=>
+            setFormData({
+              ...formData,
+              firstName:e.target.value
+            })
+          }
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        />
+
+      </div>
+
+      <div>
+
+        <label className="text-[10px] font-bold uppercase">
+          Last Name
+        </label>
+
+        <input
+          type="text"
+          required
+          value={formData.lastName}
+          onChange={(e)=>
+            setFormData({
+              ...formData,
+              lastName:e.target.value
+            })
+          }
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        />
+
+      </div>
+
+      <div>
+
+        <label className="text-[10px] font-bold uppercase">
+          Email
+        </label>
+
+        <input
+          type="email"
+          required
+          value={formData.email}
+          onChange={(e)=>
+            setFormData({
+              ...formData,
+              email:e.target.value
+            })
+          }
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        />
+
+      </div>
+
+      <div>
+
+        <label className="text-[10px] font-bold uppercase">
+          Phone Number
+        </label>
+
+        <input
+          type="tel"
+          required
+          value={formData.phone}
+          onChange={(e)=>
+            setFormData({
+              ...formData,
+              phone:e.target.value
+            })
+          }
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        />
+
+      </div>
+
+    </div>
+
+  </div>
+
+  {/* BUSINESS INFORMATION */}
+
+  <div>
+
+    <h4 className="font-bold text-orange-500 mb-4">
+      Business Information
+    </h4>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <div>
+
+        <label className="text-[10px] font-bold uppercase">
+          Business Name
+        </label>
+
+        <input
+          type="text"
+          required
+          value={formData.businessName}
+          onChange={(e)=>
+            setFormData({
+              ...formData,
+              businessName:e.target.value
+            })
+          }
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        />
+
+      </div>
+
+      <div>
+
+        <label className="text-[10px] font-bold uppercase">
+          Business Type
+        </label>
+
+        <select
+          value={formData.businessType}
+          onChange={(e)=>
+            setFormData({
+              ...formData,
+              businessType:e.target.value
+            })
+          }
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        >
+
+          <option>Individual</option>
+          <option>Company</option>
+          <option>Partnership</option>
+          <option>LLP</option>
+          <option>Private Limited</option>
+
+        </select>
+
+      </div>
+
+      <div>
+
+        <label className="text-[10px] font-bold uppercase">
+          GST Number
+        </label>
+
+        <input
+          type="text"
+          value={formData.gstNumber}
+          onChange={(e)=>
+            setFormData({
+              ...formData,
+              gstNumber:e.target.value
+            })
+          }
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        />
+
+      </div>
+
+      <div>
+
+        <label className="text-[10px] font-bold uppercase">
+          PAN Number
+        </label>
+
+        <input
+          type="text"
+          value={formData.panNumber}
+          onChange={(e)=>
+            setFormData({
+              ...formData,
+              panNumber:e.target.value
+            })
+          }
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        />
+
+      </div>
+
+    </div>
+
+  </div>
+
+  {/* ADDRESS */}
+    {/* ADDRESS */}
+
+  <div>
+
+    <h4 className="font-bold text-orange-500 mb-4">
+      Address Information
+    </h4>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      {/* Street */}
+
+      <div className="md:col-span-2">
+
+        <label className="text-[10px] font-bold uppercase">
+          Street Address
+        </label>
+
+        <input
+          type="text"
+          required
+          value={formData.address.street}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              address: {
+                ...formData.address,
+                street: e.target.value,
+              },
+            })
+          }
+          placeholder="123 MG Road"
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        />
+
+      </div>
+
+      {/* City */}
+
+      <div>
+
+        <label className="text-[10px] font-bold uppercase">
+          City
+        </label>
+
+        <input
+          type="text"
+          required
+          value={formData.address.city}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              address: {
+                ...formData.address,
+                city: e.target.value,
+              },
+            })
+          }
+          placeholder="Jaipur"
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        />
+
+      </div>
+
+      {/* State */}
+
+      <div>
+
+        <label className="text-[10px] font-bold uppercase">
+          State
+        </label>
+
+        <input
+          type="text"
+          required
+          value={formData.address.state}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              address: {
+                ...formData.address,
+                state: e.target.value,
+              },
+            })
+          }
+          placeholder="Rajasthan"
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        />
+
+      </div>
+
+      {/* Country */}
+
+      <div>
+
+        <label className="text-[10px] font-bold uppercase">
+          Country
+        </label>
+
+        <input
+          type="text"
+          required
+          value={formData.address.country}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              address: {
+                ...formData.address,
+                country: e.target.value,
+              },
+            })
+          }
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        />
+
+      </div>
+
+      {/* Pincode */}
+
+      <div>
+
+        <label className="text-[10px] font-bold uppercase">
+          Pincode
+        </label>
+
+        <input
+          type="text"
+          required
+          value={formData.address.pincode}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              address: {
+                ...formData.address,
+                pincode: e.target.value,
+              },
+            })
+          }
+          placeholder="302001"
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        />
+
+      </div>
+
+    </div>
+
+  </div>
+
+  {/* BANK DETAILS */}
+    {/* BANK DETAILS */}
+
+  <div>
+
+    <h4 className="font-bold text-orange-500 mb-4">
+      Bank Details
+    </h4>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      {/* Account Holder */}
+
+      <div>
+
+        <label className="text-[10px] font-bold uppercase">
+          Account Holder Name
+        </label>
+
+        <input
+          type="text"
+          required
+          value={formData.bankDetails.accountHolder}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              bankDetails: {
+                ...formData.bankDetails,
+                accountHolder: e.target.value,
+              },
+            })
+          }
+          placeholder="Demo Seller"
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        />
+
+      </div>
+
+      {/* Account Number */}
+
+      <div>
+
+        <label className="text-[10px] font-bold uppercase">
+          Account Number
+        </label>
+
+        <input
+          type="text"
+          required
+          value={formData.bankDetails.accountNumber}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              bankDetails: {
+                ...formData.bankDetails,
+                accountNumber: e.target.value,
+              },
+            })
+          }
+          placeholder="123456789012"
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        />
+
+      </div>
+
+      {/* IFSC */}
+
+      <div>
+
+        <label className="text-[10px] font-bold uppercase">
+          IFSC Code
+        </label>
+
+        <input
+          type="text"
+          required
+          value={formData.bankDetails.ifsc}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              bankDetails: {
+                ...formData.bankDetails,
+                ifsc: e.target.value,
+              },
+            })
+          }
+          placeholder="SBIN0001234"
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        />
+
+      </div>
+
+      {/* Bank Name */}
+
+      <div>
+
+        <label className="text-[10px] font-bold uppercase">
+          Bank Name
+        </label>
+
+        <input
+          type="text"
+          required
+          value={formData.bankDetails.bankName}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              bankDetails: {
+                ...formData.bankDetails,
+                bankName: e.target.value,
+              },
+            })
+          }
+          placeholder="State Bank of India"
+          className="w-full px-3 py-2 border rounded-lg mt-1"
+        />
+
+      </div>
+
+    </div>
+
+  </div>
+
+  {/* PASSWORD */}
+
+  <div>
+
+    <label className="text-[10px] font-bold uppercase">
+      Create Password
+    </label>
+
+    <div className="relative mt-1">
+
+      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+        <Lock className="w-4 h-4" />
+      </span>
+
+      <input
+        type={showPassword ? "text" : "password"}
+        required
+        minLength={6}
+        value={formData.password}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            password: e.target.value,
+          })
+        }
+        placeholder="Enter Password"
+        className="w-full pl-10 pr-10 py-2 border rounded-lg"
+      />
+
+      <button
+        type="button"
+        onClick={() => setShowPassword(!showPassword)}
+        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400"
+      >
+        {showPassword ? (
+          <EyeOff className="w-4 h-4" />
+        ) : (
+          <Eye className="w-4 h-4" />
+        )}
+      </button>
+
+    </div>
+
+  </div>
+    <button
+    type="submit"
+    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-all mt-4"
+  >
+    Register Seller
+  </button>
+
+  <p className="text-center text-sm text-gray-500">
+    Already have a seller account?{" "}
+    <button
+      type="button"
+      onClick={() => setAuthMode("login")}
+      className="text-orange-500 font-semibold hover:underline"
+    >
+      Login
+    </button>
+  </p>
+
+</form>
               )}
             </div>
           </div>

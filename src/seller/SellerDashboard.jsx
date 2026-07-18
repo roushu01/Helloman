@@ -31,6 +31,9 @@ import VendorPayments from "./VendorPayments";
 import VendorCommission from "./VendorCommission";
 import AddVendorPayments from "./AddVendorPayment"
 import AddVendorCommission from "./AddVendorCommission";
+import ImageUpload from "./ImageUpload";
+import AddVariant from "./AddVarient";
+import EditProduct from "./EditProduct";
 
 export default function SellerDashboard() {
   const [activePage, setActivePage] = useState("dashboard");
@@ -56,12 +59,14 @@ export default function SellerDashboard() {
             setActivePage={setActivePage}
           />
         );
-
+      case "image-upload":
+        return <ImageUpload/>
       case "edit-product":
         return (
           <EditProduct
             product={selectedProduct}
             setActivePage={setActivePage}
+            
           />
         );
       case "bulk-upload":
@@ -144,7 +149,13 @@ export default function SellerDashboard() {
       case "profile":
         return <Profile />;
       case "product-variants":
-        return <ProductVariants />;  
+        return <ProductVariants setActivePage={setActivePage} />;  
+      case "add-variant":
+            return (
+              <AddVariant
+                setActivePage={setActivePage}
+              />
+            );   
 
       default:
         return <DashboardHome />;

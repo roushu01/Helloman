@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   Package,
   DollarSign,
@@ -13,6 +13,8 @@ import {
   Save,
   X,
 } from "lucide-react";
+import {createProduct} from "../api/ProductApi"
+import api from "../api/axios";
 
 export default function Products({ setActivePage }) {
   const tabs = [
@@ -59,55 +61,157 @@ export default function Products({ setActivePage }) {
   ];
 
   const [activeTab, setActiveTab] = useState("basic");
+  const [loading,setloading]=useState(false);
+  
 
-  const [product, setProduct] = useState({
-    // Basic Details
-    productName: "",
-    productCode: "",
-    brand: "",
-    manufacturer: "",
-    category: "",
-    subCategory: "",
-    tags: "",
-    shortDescription: "",
-    description: "",
+const [categories, setCategories] = useState([]);
 
-    // Pricing
-    costPrice: "",
-    sellingPrice: "",
-    mrp: "",
-    tax: "",
-    discount: "",
+const [formData, setFormData] = useState({
+  productName: "",
+  productCode: "",
+  brand: "",
+  manufacturer: "",
+  category: "",
+  subCategory: "",
+  shortDescription: "",
+  description: "",
+  tags:[],
 
-    // Inventory
-    sku: "",
-    stock: "",
-    minStock: "",
-    maxOrderQty: "",
+  mrp: "",
+  sellingPrice: "",
+  costPrice: "",
+  gst: "",
+  taxType: "Inclusive",
+  discount: "",
 
-    // Shipping
-    weight: "",
-    length: "",
-    width: "",
-    height: "",
-    shippingClass: "",
+  sku: "",
+  barcode: "",
+  stock: "",
+  minStock: "",
+  warehouse: "",
+  stockStatus: "In Stock",
 
-    // Images
-    thumbnail: null,
-    gallery: [],
+  weight: "",
+  length: "",
+  width: "",
+  height: "",
+  shippingCharge: "",
+  deliveryTime: "",
 
-    // SEO
-    seoTitle: "",
+  images: [],
+  thumbnail: null,
+
+  variants: {
+    colors: [],
+    sizes: [],
+  },
+
+  seo: {
+    metaTitle: "",
     metaDescription: "",
-    keywords: "",
+    keywords: [],
+  },
 
-    // Variants
-    variants: [],
+  specifications: {},
+
+  isFeatured: false,
+});
+
+
+const fetchCategories = async () => {
+  try {
+    const { data } = await api.get(
+      "/api/categories"
+    );
+
+    console.log(data);
+
+    setCategories(data.data);
+  } catch (err) {
+    console.log(err);
+  }
+};
+useEffect(() => {
+  fetchCategories();
+}, []);
+const handleImageChange = (e) => {
+  const files = Array.from(e.target.files);
+
+  setFormData({
+    ...formData,
+    images: files,
   });
+};
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setloading(true);
+
+  try {
+    const payload = {
+  name: formData.productName,
+  description: formData.description,
+  shortDescription: formData.shortDescription,
+
+  category: formData.category,
+  brand: formData.brand,
+
+  price: Number(formData.sellingPrice),
+  mrp: Number(formData.mrp),
+  costPrice: Number(formData.costPrice),
+
+  gst: Number(formData.gst),
+  taxType: formData.taxType,
+
+  stock: Number(formData.stock),
+  sku: formData.sku,
+  barcode: formData.barcode,
+  minimumStockAlert: Number(formData.minStock),
+  warehouse: formData.warehouse,
+  stockStatus: formData.stockStatus,
+
+  images: formData.images,
+  thumbnail: formData.thumbnail,
+
+  shipping: {
+    weight: Number(formData.weight),
+    length: Number(formData.length),
+    width: Number(formData.width),
+    height: Number(formData.height),
+    shippingCharge: Number(formData.shippingCharge),
+    deliveryTime: formData.deliveryTime,
+  },
+
+  specifications: formData.specifications,
+
+  variants: formData.variants,
+
+  tags: formData.tags,
+
+  seo: formData.seo,
+
+  isFeatured: formData.isFeatured,
+};
+
+    const res = await createProduct(payload);
+    console.log(payload)
+
+    alert(res.message);
+
+    console.log(res.product);
+
+  } catch (err) {
+    console.log(err.response?.data);
+
+    alert(
+      err.response?.data?.message ||
+      "Failed to create product"
+    );
+  }
+};
 
   const handleChange = (e) => {
-    setProduct({
-      ...product,
+    setFormData({
+      ...formData,
       [e.target.name]: e.target.value,
     });
   };
@@ -128,8 +232,8 @@ export default function Products({ setActivePage }) {
     }
   };
 
-  const saveProduct = () => {
-    console.log(product);
+  const saveformData = () => {
+    console.log(formData);
     alert("Product Saved Successfully!");
   };
 
@@ -200,7 +304,7 @@ export default function Products({ setActivePage }) {
       </div>
 
       {/* Content */}
-
+      <form onSubmit={handleSubmit}>
       <div className="bg-white rounded-xl shadow p-6 min-h-[500px]">
 
         {activeTab === "basic" && (
@@ -226,7 +330,7 @@ export default function Products({ setActivePage }) {
         <input
           type="text"
           name="productName"
-          value={product.productName}
+          value={formData.productName}
           onChange={handleChange}
           placeholder="Enter product name"
           className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
@@ -242,7 +346,7 @@ export default function Products({ setActivePage }) {
         <input
           type="text"
           name="productCode"
-          value={product.productCode}
+          value={formData.productCode}
           onChange={handleChange}
           placeholder="SKU / Product Code"
           className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
@@ -258,7 +362,7 @@ export default function Products({ setActivePage }) {
         <input
           type="text"
           name="brand"
-          value={product.brand}
+          value={formData.brand}
           onChange={handleChange}
           placeholder="Nike"
           className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
@@ -274,7 +378,7 @@ export default function Products({ setActivePage }) {
         <input
           type="text"
           name="manufacturer"
-          value={product.manufacturer}
+          value={formData.manufacturer}
           onChange={handleChange}
           placeholder="Manufacturer name"
           className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
@@ -283,24 +387,28 @@ export default function Products({ setActivePage }) {
 
       {/* Category */}
       <div>
-        <label className="block text-sm font-medium mb-2">
-          Category
-        </label>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Category
+      </label>
 
-        <select
-          name="category"
-          value={product.category}
-          onChange={handleChange}
-          className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
-        >
-          <option value="">Select Category</option>
-          <option>Fashion</option>
-          <option>Shoes</option>
-          <option>Electronics</option>
-          <option>Accessories</option>
-          <option>Home Decor</option>
-        </select>
-      </div>
+      <select
+        name="category"
+        value={formData.category}
+        onChange={handleChange}
+        className="w-full border rounded-lg px-4 py-3"
+      >
+        <option value="">Select Category</option>
+
+        {categories.map((category) => (
+          <option
+            key={category._id}
+            value={category._id}
+          >
+            {category.name}
+          </option>
+        ))}
+      </select>
+    </div>
 
       {/* Sub Category */}
       <div>
@@ -311,7 +419,7 @@ export default function Products({ setActivePage }) {
         <input
           type="text"
           name="subCategory"
-          value={product.subCategory}
+          value={formData.subCategory}
           onChange={handleChange}
           placeholder="Running Shoes"
           className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
@@ -321,20 +429,27 @@ export default function Products({ setActivePage }) {
     </div>
 
     {/* Tags */}
-    <div>
-      <label className="block text-sm font-medium mb-2">
-        Tags
-      </label>
+  <div>
+  <label className="block text-sm font-medium mb-2">
+    Tags
+  </label>
 
-      <input
-        type="text"
-        name="tags"
-        value={product.tags}
-        onChange={handleChange}
-        placeholder="shoe, sports, nike, men"
-        className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
-      />
-    </div>
+  <input
+    type="text"
+    placeholder="shoe, sports, nike, men"
+    value={formData.tags.join(", ")}
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        tags: e.target.value
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag !== ""),
+      })
+    }
+    className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
+  />
+</div>
 
     {/* Short Description */}
     <div>
@@ -345,7 +460,7 @@ export default function Products({ setActivePage }) {
       <textarea
         rows={3}
         name="shortDescription"
-        value={product.shortDescription}
+        value={formData.shortDescription}
         onChange={handleChange}
         placeholder="Small summary about the product..."
         className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
@@ -361,7 +476,7 @@ export default function Products({ setActivePage }) {
       <textarea
         rows={8}
         name="description"
-        value={product.description}
+        value={formData.description}
         onChange={handleChange}
         placeholder="Write detailed product description..."
         className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
@@ -397,7 +512,7 @@ export default function Products({ setActivePage }) {
         <input
           type="number"
           name="mrp"
-          value={product.mrp}
+          value={formData.mrp}
           onChange={handleChange}
           placeholder="0"
           className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
@@ -412,7 +527,7 @@ export default function Products({ setActivePage }) {
         <input
           type="number"
           name="sellingPrice"
-          value={product.sellingPrice}
+          value={formData.sellingPrice}
           onChange={handleChange}
           placeholder="0"
           className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
@@ -427,7 +542,7 @@ export default function Products({ setActivePage }) {
         <input
           type="number"
           name="costPrice"
-          value={product.costPrice}
+          value={formData.costPrice}
           onChange={handleChange}
           placeholder="0"
           className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
@@ -442,7 +557,7 @@ export default function Products({ setActivePage }) {
         <input
           type="number"
           name="discount"
-          value={product.discount}
+          value={formData.discount}
           onChange={handleChange}
           placeholder="10"
           className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
@@ -457,7 +572,7 @@ export default function Products({ setActivePage }) {
         <input
           type="number"
           name="gst"
-          value={product.gst}
+          value={formData.gst}
           onChange={handleChange}
           placeholder="18"
           className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none"
@@ -471,7 +586,7 @@ export default function Products({ setActivePage }) {
 
         <select
           name="taxType"
-          value={product.taxType}
+          value={formData.taxType}
           onChange={handleChange}
           className="w-full border rounded-lg px-4 py-3"
         >
@@ -511,7 +626,7 @@ export default function Products({ setActivePage }) {
         <input
           type="text"
           name="sku"
-          value={product.sku}
+          value={formData.sku}
           onChange={handleChange}
           placeholder="SKU001"
           className="w-full border rounded-lg px-4 py-3"
@@ -526,7 +641,7 @@ export default function Products({ setActivePage }) {
         <input
           type="text"
           name="barcode"
-          value={product.barcode}
+          value={formData.barcode}
           onChange={handleChange}
           placeholder="Barcode"
           className="w-full border rounded-lg px-4 py-3"
@@ -541,7 +656,7 @@ export default function Products({ setActivePage }) {
         <input
           type="number"
           name="stock"
-          value={product.stock}
+          value={formData.stock}
           onChange={handleChange}
           placeholder="100"
           className="w-full border rounded-lg px-4 py-3"
@@ -556,7 +671,7 @@ export default function Products({ setActivePage }) {
         <input
           type="number"
           name="minStock"
-          value={product.minStock}
+          value={formData.minStock}
           onChange={handleChange}
           placeholder="10"
           className="w-full border rounded-lg px-4 py-3"
@@ -570,7 +685,7 @@ export default function Products({ setActivePage }) {
 
         <select
           name="stockStatus"
-          value={product.stockStatus}
+          value={formData.stockStatus}
           onChange={handleChange}
           className="w-full border rounded-lg px-4 py-3"
         >
@@ -588,7 +703,7 @@ export default function Products({ setActivePage }) {
         <input
           type="text"
           name="warehouse"
-          value={product.warehouse}
+          value={formData.warehouse}
           onChange={handleChange}
           placeholder="Warehouse A"
           className="w-full border rounded-lg px-4 py-3"
@@ -627,7 +742,7 @@ export default function Products({ setActivePage }) {
           type="number"
           step="0.1"
           name="weight"
-          value={product.weight}
+          value={formData.weight}
           onChange={handleChange}
           className="w-full border rounded-lg px-4 py-3"
         />
@@ -641,7 +756,7 @@ export default function Products({ setActivePage }) {
         <input
           type="number"
           name="shippingCharge"
-          value={product.shippingCharge}
+          value={formData.shippingCharge}
           onChange={handleChange}
           className="w-full border rounded-lg px-4 py-3"
         />
@@ -655,7 +770,7 @@ export default function Products({ setActivePage }) {
         <input
           type="number"
           name="length"
-          value={product.length}
+          value={formData.length}
           onChange={handleChange}
           className="w-full border rounded-lg px-4 py-3"
         />
@@ -669,7 +784,7 @@ export default function Products({ setActivePage }) {
         <input
           type="number"
           name="width"
-          value={product.width}
+          value={formData.width}
           onChange={handleChange}
           className="w-full border rounded-lg px-4 py-3"
         />
@@ -683,7 +798,7 @@ export default function Products({ setActivePage }) {
         <input
           type="number"
           name="height"
-          value={product.height}
+          value={formData.height}
           onChange={handleChange}
           className="w-full border rounded-lg px-4 py-3"
         />
@@ -697,7 +812,7 @@ export default function Products({ setActivePage }) {
         <input
           type="text"
           name="deliveryTime"
-          value={product.deliveryTime}
+          value={formData.deliveryTime}
           onChange={handleChange}
           placeholder="3-5 Days"
           className="w-full border rounded-lg px-4 py-3"
@@ -727,13 +842,15 @@ export default function Products({ setActivePage }) {
     </div>
 
     <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-
+     <button>
       <input
-        type="file"
-        multiple
-        className="mb-4"
-      />
-
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={handleImageChange}
+          className="mb-4"
+        />
+</button>
       <p className="text-gray-500">
         Drag & Drop images here or browse
       </p>
@@ -773,11 +890,19 @@ export default function Products({ setActivePage }) {
 
         <input
           type="text"
-          name="colors"
-          value={product.colors}
-          onChange={handleChange}
-          placeholder="Red, Black, White"
-          className="w-full border rounded-lg px-4 py-3"
+          placeholder="Red, Blue, Black"
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              variants: {
+                ...formData.variants,
+                colors: e.target.value
+                  .split(",")
+                  .map(item => item.trim())
+                  .filter(item => item !== ""),
+              },
+            })
+          }
         />
       </div>
 
@@ -787,13 +912,21 @@ export default function Products({ setActivePage }) {
         </label>
 
         <input
-          type="text"
-          name="sizes"
-          value={product.sizes}
-          onChange={handleChange}
-          placeholder="S, M, L, XL"
-          className="w-full border rounded-lg px-4 py-3"
-        />
+            type="text"
+            placeholder="S, M, L, XL"
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                variants: {
+                  ...formData.variants,
+                  sizes: e.target.value
+                    .split(",")
+                    .map(item => item.trim())
+                    .filter(item => item !== ""),
+                },
+              })
+            }
+          />
       </div>
 
     </div>
@@ -829,7 +962,7 @@ export default function Products({ setActivePage }) {
         <input
           type="text"
           name="metaTitle"
-          value={product.metaTitle}
+          value={formData.metaTitle}
           onChange={handleChange}
           className="w-full border rounded-lg px-4 py-3"
         />
@@ -845,7 +978,7 @@ export default function Products({ setActivePage }) {
         <textarea
           rows={4}
           name="metaDescription"
-          value={product.metaDescription}
+          value={formData.metaDescription}
           onChange={handleChange}
           className="w-full border rounded-lg px-4 py-3"
         />
@@ -861,7 +994,7 @@ export default function Products({ setActivePage }) {
         <input
           type="text"
           name="keywords"
-          value={product.keywords}
+          value={formData.keywords}
           onChange={handleChange}
           placeholder="shoe,nike,sports"
           className="w-full border rounded-lg px-4 py-3"
@@ -896,67 +1029,69 @@ export default function Products({ setActivePage }) {
     <div className="bg-gray-50 rounded-xl p-6 space-y-3">
 
       <div className="flex justify-between border-b pb-2">
-        <span className="font-medium">Product Name</span>
-        <span>{product.productName}</span>
+        <span className="font-medium">formData Name</span>
+        <span>{formData.formDataName}</span>
       </div>
 
       <div className="flex justify-between border-b pb-2">
         <span className="font-medium">Category</span>
-        <span>{product.category}</span>
+        <span>{formData.category}</span>
       </div>
 
       <div className="flex justify-between border-b pb-2">
         <span className="font-medium">Brand</span>
-        <span>{product.brand}</span>
+        <span>{formData.brand}</span>
       </div>
 
       <div className="flex justify-between border-b pb-2">
         <span className="font-medium">MRP</span>
-        <span>₹{product.mrp}</span>
+        <span>₹{formData.mrp}</span>
       </div>
 
       <div className="flex justify-between border-b pb-2">
         <span className="font-medium">Selling Price</span>
-        <span>₹{product.sellingPrice}</span>
+        <span>₹{formData.sellingPrice}</span>
       </div>
 
       <div className="flex justify-between border-b pb-2">
         <span className="font-medium">Stock</span>
-        <span>{product.stock}</span>
+        <span>{formData.stock}</span>
       </div>
 
       <div className="flex justify-between border-b pb-2">
         <span className="font-medium">Weight</span>
-        <span>{product.weight} kg</span>
+        <span>{formData.weight} kg</span>
       </div>
 
       <div className="flex justify-between">
         <span className="font-medium">Delivery Time</span>
-        <span>{product.deliveryTime}</span>
+        <span>{formData.deliveryTime}</span>
       </div>
 
     </div>
 
     <div className="flex justify-end gap-4">
 
-      <button
-        className="px-6 py-3 rounded-lg border border-gray-300 hover:bg-gray-100"
-      >
-        Save Draft
-      </button>
+     
 
-      <button
-        className="px-6 py-3 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold"
-      >
-        Publish Product
-      </button>
+      <button type="submit"disabled={loading}
+          className={`px-6 py-3 rounded-lg font-semibold text-white ${
+            loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-orange-500 hover:bg-orange-600"
+          }`}
+        >
+          {loading ? "Publishing..." : "Publish Product"}
+        </button>
 
     </div>
 
   </div>
+
 )}
 
       </div>
+      </form>
 
       {/* Navigation */}
 
@@ -972,13 +1107,19 @@ export default function Products({ setActivePage }) {
         </button>
 
         {currentIndex === tabs.length - 1 ? (
-          <button
-            onClick={saveProduct}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg"
-          >
-            <Save size={18} />
-            Save Product
-          </button>
+//          <button
+//   type="submit"
+//   disabled={loading}
+//   className={`flex items-center gap-2 px-6 py-3 rounded-lg text-white ${
+//     loading
+//       ? "bg-gray-400 cursor-not-allowed"
+//       : "bg-green-600 hover:bg-green-700"
+//   }`}
+// >
+//   <Save size={18} />
+//   {loading ? "Saving..." : "Save Product"}
+// </button>
+<></>
         ) : (
           <button
             onClick={nextTab}

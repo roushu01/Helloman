@@ -1,6 +1,6 @@
 // src/seller/BulkUpload.jsx
 
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   UploadCloud,
   FileSpreadsheet,
@@ -8,22 +8,41 @@ import {
   Trash2,
   CheckCircle,
 } from "lucide-react";
-
+import { uploadProductsExcel } from "../api/bulkUploadApi";
 export default function BulkUpload() {
   const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleFile = (e) => {
     setFile(e.target.files[0]);
   };
 
-  const handleUpload = () => {
-    if (!file) {
-      alert("Please select an Excel file");
-      return;
-    }
+ const handleUpload = async () => {
+  if (!file) {
+    alert("Please select an Excel file");
+    return;
+  }
 
-    alert(`${file.name} uploaded successfully`);
-  };
+  try {
+    setLoading(true);
+
+    const res = await uploadProductsExcel(file);
+
+    alert(res.message || "Products uploaded successfully");
+
+    setFile(null);
+
+  } catch (err) {
+    console.error(err);
+
+    alert(
+      err.response?.data?.message ||
+      "Upload failed"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="space-y-6">
@@ -137,14 +156,14 @@ export default function BulkUpload() {
 
         <div className="mt-8 flex justify-end">
 
-          <button
+         <button
             onClick={handleUpload}
-            className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg flex items-center gap-2"
+            disabled={loading}
+            className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg flex items-center gap-2 disabled:opacity-50"
           >
             <UploadCloud size={20} />
-            Upload Products
+            {loading ? "Uploading..." : "Upload Products"}
           </button>
-
         </div>
 
       </div>

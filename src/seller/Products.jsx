@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Search, RotateCcw, Plus, Pencil, Trash2 } from "lucide-react";
 
-
+import { getSellerProducts } from "../api/ProductApi";
 
 export default function Products({
   setActivePage,
@@ -18,47 +18,44 @@ export default function Products({
     toDate: "",
   });
 
-  const [products] = useState([
-    {
-      id: "P001",
-      name: "Nike Air Max",
-      category: "Shoes",
-      price: 4999,
-      stock: 45,
-      status: "Active",
-    },
-    {
-      id: "P002",
-      name: "Leather Wallet",
-      category: "Accessories",
-      price: 999,
-      stock: 20,
-      status: "Inactive",
-    },
-    {
-      id: "P003",
-      name: "Wireless Earbuds",
-      category: "Electronics",
-      price: 2999,
-      stock: 35,
-      status: "Active",
-    },
-  ]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+  fetchProducts();
+}, []);
+
+const fetchProducts = async () => {
+  try {
+    const data = await getSellerProducts();
+
+    console.log("Products:", data);
+
+    // adjust according to your API response
+    if (data.success) {
+      setProducts(data.products);
+    } else {
+      setProducts(data);
+    }
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const filteredProducts = products.filter((product) => {
-    return (
-      product.id
-        .toLowerCase()
-        .includes(filters.productId.toLowerCase()) &&
-      product.name
-        .toLowerCase()
-        .includes(filters.productName.toLowerCase()) &&
-      (filters.category === "" ||
-        product.category === filters.category) &&
-      (filters.status === "" ||
-        product.status === filters.status)
-    );
-  });
+  const productId = product._id?.toLowerCase() || "";
+  const productName = product.name?.toLowerCase() || "";
+  const category = product.category || "";
+  const status = product.status || "";
+
+  return (
+    productId.includes(filters.productId.toLowerCase()) &&
+    productName.includes(filters.productName.toLowerCase()) &&
+    (filters.category === "" || category === filters.category) &&
+    (filters.status === "" || status === filters.status)
+  );
+});
 
   const resetFilters = () => {
     setFilters({
@@ -266,7 +263,7 @@ export default function Products({
             {filteredProducts.map((product) => (
 
               <tr
-                key={product.id}
+                key={product.image}
                 className="border-t hover:bg-gray-50"
               >
 
@@ -292,12 +289,12 @@ export default function Products({
 
                   <span
                     className={`px-3 py-1 rounded-full text-sm ${
-                      product.status === "Active"
+                      product.isActive=== "Active"
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
                     }`}
                   >
-                    {product.status}
+                    {product.isActive?"Active":"Inactive"}
                   </span>
 
                 </td>
