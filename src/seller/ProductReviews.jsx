@@ -1,6 +1,7 @@
 // src/seller/ProductReviews.jsx
 
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
+import { getSellerReviews } from "../api/reviewApi";
 import {
   Search,
   RotateCcw,
@@ -23,64 +24,27 @@ export default function ProductReviews() {
     toDate: "",
   });
 
-  const reviews = [
-    {
-      id: "R001",
-      productId: "P001",
-      product: "Nike Air Max",
-      customer: "Roushni Kumari",
-      rating: 5,
-      review:
-        "Excellent quality shoes. Very comfortable for daily use.",
-      date: "10 Jul 2026",
-      status: "Approved",
-    },
-    {
-      id: "R002",
-      productId: "P002",
-      product: "Wireless Earbuds",
-      customer: "Rahul Sharma",
-      rating: 4,
-      review:
-        "Sound quality is amazing. Battery backup is good.",
-      date: "09 Jul 2026",
-      status: "Pending",
-    },
-    {
-      id: "R003",
-      productId: "P003",
-      product: "Leather Wallet",
-      customer: "Aman Singh",
-      rating: 3,
-      review:
-        "Product is decent but delivery was slightly delayed.",
-      date: "08 Jul 2026",
-      status: "Approved",
-    },
-    {
-      id: "R004",
-      productId: "P004",
-      product: "Sports Watch",
-      customer: "Priya Sharma",
-      rating: 2,
-      review:
-        "Average quality. Expected better finishing.",
-      date: "07 Jul 2026",
-      status: "Rejected",
-    },
-    {
-      id: "R005",
-      productId: "P005",
-      product: "Laptop Bag",
-      customer: "Karan Mehta",
-      rating: 5,
-      review:
-        "Premium quality and enough storage space.",
-      date: "06 Jul 2026",
-      status: "Approved",
-    },
-  ];
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+  fetchReviews();
+}, []);
 
+const fetchReviews = async () => {
+  try {
+    setLoading(true);
+
+    const data = await getSellerReviews();
+
+    // Depending on your backend response
+    setReviews(data.data || data.reviews || []);
+
+  } catch (err) {
+    console.error(err.response?.data || err);
+  } finally {
+    setLoading(false);
+  }
+};
   const filteredReviews = reviews.filter((review) => {
     return (
       review.productId

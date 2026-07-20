@@ -8,11 +8,11 @@ import {
   Trash2,
   CheckCircle,
 } from "lucide-react";
-import { uploadProductsExcel } from "../api/bulkUploadApi";
+import { uploadProductsExcel,getBulkUploadHistory } from "../api/bulkUploadApi";
 export default function BulkUpload() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const [history, setHistory] = useState([]);
   const handleFile = (e) => {
     setFile(e.target.files[0]);
   };
@@ -41,6 +41,21 @@ export default function BulkUpload() {
     );
   } finally {
     setLoading(false);
+  }
+};
+useEffect(() => {
+  fetchHistory();
+}, []);
+
+const fetchHistory = async () => {
+  try {
+    const res = await getBulkUploadHistory();
+
+    if (res.success) {
+      setHistory(res.data);
+    }
+  } catch (err) {
+    console.error(err);
   }
 };
 
@@ -207,36 +222,55 @@ export default function BulkUpload() {
           </thead>
 
           <tbody>
+  {history.length === 0 ? (
+    <tr>
+      <td
+        colSpan={4}
+        className="text-center py-6 text-gray-500"
+      >
+        No upload history found
+      </td>
+    </tr>
+  ) : (
+    history.map((item) => (
+      <tr
+        key={item._id}
+        className="border-t hover:bg-gray-50"
+      >
+        <td className="p-4">
+          {item.fileName}
+        </td>
 
-            <tr className="border-t">
+        <td className="p-4">
+          {new Date(item.createdAt).toLocaleDateString()}
+        </td>
 
-              <td className="p-4">
-                Products_July.xlsx
-              </td>
+        <td className="p-4">
+          {item.totalProducts}
+          <div className="text-xs text-gray-500">
+            Success: {item.successCount} | Failed: {item.failedCount}
+          </div>
+        </td>
 
-              <td className="p-4">
-                11 Jul 2026
-              </td>
-
-              <td className="p-4">
-                245
-              </td>
-
-              <td className="p-4">
-
-                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full inline-flex items-center gap-2">
-
-                  <CheckCircle size={16} />
-
-                  Success
-
-                </span>
-
-              </td>
-
-            </tr>
-
-          </tbody>
+        <td className="p-4">
+          <span
+            className={`px-3 py-1 rounded-full inline-flex items-center gap-2
+              ${
+                item.status === "Completed"
+                  ? "bg-green-100 text-green-700"
+                  : item.status === "Failed"
+                  ? "bg-red-100 text-red-700"
+                  : "bg-yellow-100 text-yellow-700"
+              }`}
+          >
+            <CheckCircle size={16} />
+            {item.status}
+          </span>
+        </td>
+      </tr>
+    ))
+  )}
+</tbody>
 
         </table>
 

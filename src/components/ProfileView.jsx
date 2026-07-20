@@ -32,7 +32,7 @@ export default function Profile({ user, onLogout }) {
       comment: review.comment,
     });
 
-    alert(res.message || "Review added");
+    alert( "Review added");
 
     setShowReviewModal(false);
 
@@ -45,7 +45,7 @@ export default function Profile({ user, onLogout }) {
     console.error(err);
 
     alert(
-      err.response?.data?.message ||
+      err.response?.data ||
       "Unable to submit review"
     );
   }
@@ -223,18 +223,31 @@ useEffect(() => {
                         <p className="text-gray-500 text-sm">
                           Quantity : {item.quantity}
                         </p>
-
+          
+{/* 
                         <p className="text-gray-500 text-sm">
                           Payment : {order.payment.method}
-                        </p>
+                        </p> */}
 
                         <p className="text-gray-500 text-sm">
                           Status : {order.orderStatus}
                         </p>
                       </div>
                     </div>
+                   <div>
+                                  <button
+        onClick={() => {
+          console.log("Clicked");
+          console.log(item);
 
-                  
+          setSelectedProductId(item.product);
+          setShowReviewModal(true);
+        }}
+        className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg"
+      >
+        Write Review
+      </button>
+                  </div>
                   </div>
                 );
               })}
@@ -248,15 +261,7 @@ useEffect(() => {
                 ₹{order.pricing.total.toLocaleString("en-IN")}
               </span>
             </div>
-            <button
-            onClick={() => {
-              setSelectedProductId(item.product);
-              setShowReviewModal(true);
-            }}
-            className="mt-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg"
-          >
-            Write Review
-          </button>
+            
           </div>
         ))}
       </div>

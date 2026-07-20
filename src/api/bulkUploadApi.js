@@ -17,3 +17,14 @@ export const uploadProductsExcel = async (file) => {
 
   return data;
 };
+export const getBulkUploadHistory = async () => {
+  const token = localStorage.getItem("token");
+
+  const res = await api.get("/api/bulk-upload/history", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
+};
