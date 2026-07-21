@@ -13,9 +13,12 @@ export default function Header({
   isMode,
   toggleMode,
   onLoginClick,
+  onSellerLogin,   // ADD THIS
   loggedInUser,
   onLogout,
+  setLoggedInUser
 }) {
+
   const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -59,7 +62,9 @@ export default function Header({
               About Us
             </button>
             <button
-              onClick={() => setView("seller")}
+                onClick={() => {
+                onSellerLogin();
+              }}
               className="hover:text-white transition-colors cursor-pointer font-semibold"
             >
               <span className="sm:hidden">Seller Login/Register</span>

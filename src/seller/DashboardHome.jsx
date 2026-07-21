@@ -1,4 +1,4 @@
-import React from "react";
+import React ,{useEffect,useState}from "react";
 import {
   Package,
   ShoppingCart,
@@ -21,18 +21,41 @@ import {
   Legend,
 
 } from "recharts";
-
+import { getSellerDashboard } from "../api/SellerApi";
 
 
 
 export default function DashboardHome() {
   // Dummy Data
-  const stats = {
-    totalProducts: 24,
-    totalOrders: 156,
-    totalUsers: 89,
-    totalRevenue: 245600,
-  };
+const [stats, setStats] = useState({
+  totalProducts: 0,
+  totalOrders: 0,
+  totalUsers: 0,
+  totalRevenue: 0,
+  monthlyRevenue: 0,
+  monthlySales: 0,
+});
+useEffect(() => {
+  fetchDashboard();
+}, []);
+
+const fetchDashboard = async () => {
+  try {
+    const response = await getSellerDashboard();
+
+    if (response.success) {
+      setStats(response.dashboard);
+      setSalesChart(response.dashboard.salesChart || []);
+    }
+  } catch (err) {
+    console.log(err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const [salesChart, setSalesChart] = useState([]);
+const [loading, setLoading] = useState(true);
 
   const recentOrders = [
     {

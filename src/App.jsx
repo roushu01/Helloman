@@ -18,7 +18,7 @@ import ResetPassword from "./components/ResetPassword";
 import SellerDashboard from "./seller/SellerDashboard";
 import {resetPassword} from "./api/authApi";
 import { getProducts } from "./api/ProductApi";
-
+import { useClerk } from "@clerk/clerk-react";
 import { Grid, List, ChevronDown, CheckCircle, ArrowRight } from "lucide-react";
 
 export default function App() {
@@ -29,16 +29,37 @@ export default function App() {
       ? path.split("/reset-password/")[1]
       : "";
 
-
+ const { signOut } = useClerk();
       //Seller login
-     const onSellerLogin= (user) => {
-        if (user.role === "seller") {
-          setLoggedInUser(user);
-          setView("seller-dashboard");
-        } else {
-          alert("You are not authorized to access the seller dashboard.");
-        }
-      };
+    const onSellerLogin = (user) => {
+  if (user.role === "seller") {
+
+    localStorage.setItem("clerkId", user.clerkId);
+    localStorage.setItem("user", JSON.stringify(user));
+
+    setLoggedInUser(user);
+    setView("seller-dashboard");
+
+  } else {
+    alert("You are not authorized");
+  }
+};
+const handleSellerLoginPage = async () => {
+
+  // Logout from Clerk session
+  await signOut();
+
+  // Clear your app storage
+  localStorage.removeItem("sellerClerkId");
+  localStorage.removeItem("clerkId");
+  localStorage.removeItem("user");
+
+  setLoggedInUser(null);
+  setCartItems([]);
+
+  // Open seller login/register page
+  setView("seller");
+};
   // Navigation & View State
  
   const [currentView, setView] = useState("home"); // "home", "products", "about", "contact", "seller"
@@ -75,7 +96,7 @@ export default function App() {
 
   // Authentication State
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [loggedInUser, setLoggedInUser] = useState(null);
+ const [loggedInUser, setLoggedInUser] = useState(null);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
 
   
@@ -241,12 +262,26 @@ const handleViewDetails = (id) => {
   }
 };
 useEffect(() => {
-  const token = localStorage.getItem("token");
+
+  const clerkId = localStorage.getItem("clerkId");
   const user = localStorage.getItem("user");
 
-  if (token && user) {
-    setLoggedInUser(JSON.parse(user));
+  if (clerkId && user) {
+
+    const parsedUser = JSON.parse(user);
+
+    setLoggedInUser(parsedUser);
+
+
+    if(parsedUser.role === "seller"){
+      setView("seller-dashboard");
+    }
+    else{
+      setView("home");
+    }
+
   }
+
 }, []);
   // Filter products dynamically
 const filteredProducts = useMemo(() => {
@@ -322,9 +357,11 @@ console.log(filteredProducts);
   );
 };
 
-  const handleLogout = () => {
-  localStorage.removeItem("token");
+const handleLogout = () => {
+
   localStorage.removeItem("user");
+  localStorage.removeItem("sellerClerkId");
+  localStorage.removeItem("clerkId");
 
   setLoggedInUser(null);
   setCartItems([]);
@@ -361,6 +398,7 @@ if (isResetPassword) {
           setSelectedCategory(cat);
           setAppliedFilters((prev) => ({ ...prev, category: cat }));
         }}
+         onSellerLogin={handleSellerLoginPage}
         cartCount={cartCount}
         openCart={handleOpenCart}
         searchQuery={searchQuery.trim()}
