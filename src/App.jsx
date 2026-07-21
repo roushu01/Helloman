@@ -261,28 +261,7 @@ const handleViewDetails = (id) => {
     setView("product-detail");
   }
 };
-useEffect(() => {
 
-  const clerkId = localStorage.getItem("clerkId");
-  const user = localStorage.getItem("user");
-
-  if (clerkId && user) {
-
-    const parsedUser = JSON.parse(user);
-
-    setLoggedInUser(parsedUser);
-
-
-    if(parsedUser.role === "seller"){
-      setView("seller-dashboard");
-    }
-    else{
-      setView("home");
-    }
-
-  }
-
-}, []);
   // Filter products dynamically
 const filteredProducts = useMemo(() => {
   return products.filter((product) => {

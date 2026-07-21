@@ -179,13 +179,7 @@ if(result.status==="complete"){
 }
 
 };
-        useEffect(()=>{
 
-          return()=>{
-
-          };
-
-          },[isLoggedIn]);
 const handleRegister = async (e) => {
   e.preventDefault();
 

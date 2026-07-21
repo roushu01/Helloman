@@ -171,13 +171,13 @@ export default function Header({
 
           {/* Right-side controls (desktop, lg+) */}
           <div className="hidden lg:flex items-center gap-1.5 shrink-0">
-            <button
+            {/* <button
               onClick={toggleMode}
               className="p-2 rounded-full hover:bg-orange-100 text-slate-600 transition-colors"
               aria-label="Toggle mode"
             >
               {isMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
+            </button> */}
 
             <button
               onClick={openCart}
@@ -208,13 +208,13 @@ export default function Header({
           {/* Mobile / tablet controls — visible for the ENTIRE range below `lg`,
               so there's no dead zone between md and lg anymore */}
           <div className="flex lg:hidden items-center gap-2 shrink-0">
-            <button
+            {/* <button
               onClick={toggleMode}
               className="p-2 rounded-full hover:bg-orange-100 text-slate-600"
               aria-label="Toggle mode"
             >
               {isMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
+            </button> */}
 
             <button onClick={openCart} className="relative p-2">
               <ShoppingCart className="w-5 h-5 text-slate-700" />
