@@ -15,11 +15,18 @@ import {
   EyeOff,
 } from "lucide-react";
 
+import { useSignUp } from "@clerk/clerk-react";
 export default function SellerRegister({ onSellerLogin }) {
   const [authMode, setAuthMode] = useState("login"); // "login" | "signup"
   const [isRegistered, setIsRegistered] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading,setLoading] = useState(false);
+  const [step, setStep] = useState(1);
+  
 
+const [email, setEmail] = useState("");
+
+const [otp, setOtp] = useState("");
   const [formData, setFormData] = useState({
   firstName: "",
   lastName: "",
@@ -51,7 +58,7 @@ export default function SellerRegister({ onSellerLogin }) {
 
   const [loginData, setLoginData] = useState({
     email: "",
-    password: "",
+   
   });
 const handleRegister = async (e) => {
   e.preventDefault();
@@ -113,7 +120,7 @@ const handleLogin = async (e) => {
   try {
     const response = await api.post("/api/auth/login", {
   email: loginData.email,
-  password: loginData.password,
+ 
 });
 
 console.log(response.data);
@@ -147,9 +154,83 @@ onSellerLogin({
   console.log("Response:", error.response?.data);
 }
 };
+const { signUp,setActive,isLoaded } = useSignUp();
+
+const sendOtp = async () => {
+
+  if (!email) {
+    alert("Please enter email");
+    return;
+  }
+
+  try {
+
+    setLoading(true);
+
+    await signUp.create({
+      emailAddress: email,
+    });
+
+    await signUp.prepareEmailAddressVerification({
+      strategy: "email_code",
+    });
+
+    setStep(1);
+
+  } catch(err){
+
+    console.log(err);
+    alert(
+      err.errors?.[0]?.longMessage ||
+      "Unable to send OTP"
+    );
+
+  } finally {
+    setLoading(false);
+  }
+};
+
+const verifyOtp = async () => {
+  if (!isLoaded) return;
+
+  try {
+    const completeSignUp =
+      await signUp.attemptEmailAddressVerification({
+        code: otp,
+      });
+
+    console.log(completeSignUp);
+
+    if (completeSignUp.status === "complete") {
+      await setActive({
+        session: completeSignUp.createdSessionId,
+      });
+
+      alert("OTP Verified Successfully");
+
+      setFormData({
+        ...formData,
+        email,
+      });
+
+      setStep(3);
+    } else {
+      alert("Verification not completed");
+    }
+  } catch (err) {
+    console.log(err);
+    alert(err.errors?.[0]?.longMessage || "Invalid OTP");
+  }
+};
+const changeEmail = () => {
+  setOtp("");
+  setStep(2);
+};
   return (
+
+    
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 flex flex-col gap-10" id="seller-register-page">
-   
+      
         <>
           {/* Intro header with statistics */}
           <div className="flex justify-center  items-center">
@@ -209,7 +290,7 @@ onSellerLogin({
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-1">
+                  {/* <div className="flex flex-col gap-1">
                     <label className="text-[10px] font-bold text-slate-400 uppercase">Password</label>
                     <div className="relative">
                       <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
@@ -231,7 +312,7 @@ onSellerLogin({
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
-                  </div>
+                  </div> */}
 
                   <div className="flex justify-between items-center text-[11px]">
                     <label className="flex items-center gap-1.5 text-slate-500  cursor-pointer">
@@ -265,7 +346,83 @@ onSellerLogin({
                     </button>
                   </p>
                 </form>
+               
+                
               ) : (
+                  step === 1 ? (
+    <>
+        <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8">
+
+          <h2 className="text-2xl font-bold text-center mb-2">
+          Enter Verification Code
+          </h2>
+
+          <p className="text-sm text-gray-500 text-center mb-6">
+          Enter the 6-digit code sent to
+          <br />
+          <span className="font-semibold">{email}</span>
+          </p>
+
+          <input
+          type="text"
+          maxLength={6}
+          placeholder="123456"
+          value={otp}
+          onChange={(e)=>setOtp(e.target.value)}
+          className="w-full border rounded-lg px-4 py-3 text-center tracking-[10px] text-xl font-semibold mb-5 focus:ring-2 focus:ring-orange-500 outline-none"
+          />
+
+          <button
+          type="button"
+          onClick={verifyOtp}
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition"
+          >
+          Verify OTP
+          </button>
+          <button
+            type="button"
+            onClick={changeEmail}
+            className="w-full mt-3 border border-orange-500 text-orange-500 py-3 rounded-lg font-semibold hover:bg-orange-50 transition"
+          >
+            Change Email / Resend OTP
+          </button>
+
+          </div>
+    </>
+                  ):(
+    step === 2 ? (
+    <>
+        <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8">
+
+        <h2 className="text-2xl font-bold text-center mb-2">
+        Verify your Email
+        </h2>
+
+        <p className="text-sm text-gray-500 text-center mb-6">
+        We'll send a verification code to your email.
+        </p>
+
+        <input
+        type="email"
+        placeholder="Enter your email"
+        value={email}
+        onChange={(e)=>setEmail(e.target.value)}
+        className="w-full border rounded-lg px-4 py-3 mb-5 focus:ring-2 focus:ring-orange-500 outline-none"
+        />
+
+        <button
+        type="button"
+        onClick={sendOtp}
+        disabled={loading}
+        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition"
+        >
+        {loading?"Sending...":"Send OTP"}
+        </button>
+
+        </div>
+    </>
+):(
+              
                 /* ---------------- SIGN UP FORM ---------------- */
                <form onSubmit={handleRegister} className="flex flex-col gap-5">
 
@@ -814,6 +971,8 @@ onSellerLogin({
   </p>
 
 </form>
+)  
+                  )
               )}
             </div>
           </div>

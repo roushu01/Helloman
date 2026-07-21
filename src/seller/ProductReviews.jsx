@@ -45,23 +45,33 @@ const fetchReviews = async () => {
     setLoading(false);
   }
 };
-  const filteredReviews = reviews.filter((review) => {
-    return (
-      review.productId
-        .toLowerCase()
-        .includes(filters.productId.toLowerCase()) &&
-      review.product
-        .toLowerCase()
-        .includes(filters.productName.toLowerCase()) &&
-      review.customer
-        .toLowerCase()
-        .includes(filters.customer.toLowerCase()) &&
-      (filters.rating === "" ||
-        review.rating === Number(filters.rating)) &&
-      (filters.status === "" ||
-        review.status === filters.status)
-    );
-  });
+ const filteredReviews = reviews.filter((review) => {
+
+  const productId = review.product?._id || "";
+  const productName = review.product?.name || "";
+  const customerName = review.customer?.fullName || "";
+
+  return (
+    productId
+      .toString()
+      .toLowerCase()
+      .includes(filters.productId.toLowerCase()) &&
+
+    productName
+      .toLowerCase()
+      .includes(filters.productName.toLowerCase()) &&
+
+    customerName
+      .toLowerCase()
+      .includes(filters.customer.toLowerCase()) &&
+
+    (filters.rating === "" ||
+      review.rating === Number(filters.rating)) &&
+
+    (filters.status === "" ||
+      review.status === filters.status)
+  );
+});
 
   const resetFilters = () => {
     setFilters({
@@ -82,10 +92,13 @@ const fetchReviews = async () => {
   const pendingReviews = reviews.filter(
     (r) => r.status === "Pending"
   ).length;
-  const avgRating = (
-    reviews.reduce((sum, r) => sum + r.rating, 0) /
-    reviews.length
-  ).toFixed(1);
+const avgRating =
+  reviews.length > 0
+    ? (
+        reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
+        reviews.length
+      ).toFixed(1)
+    : "0.0";
 
   return (
     <div className="space-y-6">
@@ -381,11 +394,11 @@ const fetchReviews = async () => {
                   <td className="p-4">
 
                     <div className="font-medium">
-                      {review.product}
+                     {review.product?.name}
                     </div>
 
                     <div className="text-xs text-gray-500">
-                      {review.productId}
+                      {review.product?._id}
                     </div>
 
                   </td>
@@ -393,7 +406,7 @@ const fetchReviews = async () => {
                   {/* Customer */}
 
                   <td className="p-4">
-                    {review.customer}
+                    {review.customer?.fullName}
                   </td>
 
                   {/* Rating */}

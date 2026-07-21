@@ -26,28 +26,25 @@ export default function Profile({ user, onLogout }) {
   });
   const handleReviewSubmit = async () => {
   try {
-    const res = await addReview({
+    await addReview({
       productId: selectedProductId,
       rating: review.rating,
       comment: review.comment,
     });
 
-    alert( "Review added");
+    alert("Review submitted successfully");
 
-    setShowReviewModal(false);
-
+    // Reset form
     setReview({
       rating: 5,
       comment: "",
     });
 
+    setSelectedProductId(null);
+    setShowReviewModal(false);
+
   } catch (err) {
     console.error(err);
-
-    alert(
-      err.response?.data ||
-      "Unable to submit review"
-    );
   }
 };
   const fetchCart = async () => {
@@ -360,7 +357,14 @@ useEffect(() => {
       <div className="flex justify-end gap-3 mt-6">
 
         <button
-          onClick={() => setShowReviewModal(false)}
+        onClick={() => {
+              setReview({
+                rating: 5,
+                comment: "",
+              });
+              setSelectedProductId(null);
+              setShowReviewModal(false);
+            }}
           className="px-5 py-2 border rounded-lg"
         >
           Cancel

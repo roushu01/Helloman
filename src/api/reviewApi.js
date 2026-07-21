@@ -4,7 +4,7 @@ export const addReview = async (reviewData) => {
   const token = localStorage.getItem("token");
 
   const res = await api.post(
-    "/api/reviews",
+    "/api/reviews/",
     reviewData,
     {
       headers: {
@@ -28,4 +28,5 @@ export const getSellerReviews = async (filters = {}) => {
   });
 
   return res.data;
+  console.log(res.data)
 };
