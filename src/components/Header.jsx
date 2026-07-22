@@ -62,8 +62,8 @@ export default function Header({
               About Us
             </button>
             <button
-                onClick={() => {
-                onSellerLogin();
+              onClick={() => {
+                setView("seller")
               }}
               className="hover:text-white transition-colors cursor-pointer font-semibold"
             >
@@ -320,7 +320,11 @@ export default function Header({
             <button
               className="text-left"
               onClick={() => {
-                setView("seller");
+                if (typeof onSellerLogin === "function") {
+                  onSellerLogin();
+                } else {
+                  setView("seller");
+                }
                 setMobileMenuOpen(false);
               }}
             >

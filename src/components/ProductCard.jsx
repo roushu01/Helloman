@@ -1,13 +1,24 @@
 import React from "react";
 import { Star, ShoppingCart, Eye } from "lucide-react";
 
-
 export default function ProductCard({ product, onViewDetails, onAddToCart }) {
+  const productId = product._id || product.id;
+  const productName = product.name || product.title || "Product";
+  const productBrand = product.brand || product.vendor || "Brand";
+  const productImage =
+    product.thumbnail?.url ||
+    (typeof product.images?.[0] === "string"
+      ? product.images[0]
+      : product.images?.[0]?.url) ||
+    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800";
+  const productPrice = Number(product.discountPrice ?? product.price ?? 0);
+  const productRating = Number(product.rating || 0);
+
   return (
     <div
-      onClick={() => onViewDetails(product._id)}
-      className="group bg-white  rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:border-orange-200 transition-all duration-300 flex flex-col h-full cursor-pointer relative"
-      id={`product-card-${product._id}`}
+      onClick={() => onViewDetails(productId)}
+      className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:border-orange-200 transition-all duration-300 flex flex-col h-full cursor-pointer relative"
+      id={`product-card-${productId}`}
     >
       {/* Product Image Area */}
       <div className="relative w-full h-55 aspect-square bg-gray-50 overflow-hidden shrink-0">
@@ -23,19 +34,18 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onViewDetails(product._id);
+              onViewDetails(productId);
             }}
             className="p-2.5 bg-white text-slate-800 rounded-full shadow-lg hover:bg-orange-500 hover:text-white transition-all transform hover:scale-110"
             title="View Details"
           >
             <Eye className="w-5 h-5" />
           </button>
-        
         </div>
 
         <img
-          src={product.images?.[0]?.url}
-          alt={product.title}
+          src={productImage}
+          alt={productName}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-108"
           referrerPolicy="no-referrer"
         />
@@ -44,48 +54,50 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
       {/* Product Text Details */}
       <div className="p-4.5 flex flex-col flex-1 gap-2.5">
         {/* Vendor tag */}
-        <span className="text-[11px] font-bold text-slate-400  uppercase tracking-widest truncate">
-          {product.brand}
+        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest truncate">
+          {productBrand}
         </span>
 
         {/* Title */}
-        <h4 className="text-sm font-bold text-slate-800  group-hover:text-orange-500 transition-colors line-clamp-2 leading-snug">
-          {product.name}
+        <h4 className="text-sm font-bold text-slate-800 group-hover:text-orange-500 transition-colors line-clamp-2 leading-snug">
+          {productName}
         </h4>
 
         {/* Rating Row */}
-        <div className="flex items-center gap-1.5" id={`product-rating-${product._id}`}>
+        <div className="flex items-center gap-1.5" id={`product-rating-${productId}`}>
           <div className="flex text-yellow-400">
             {Array.from({ length: 5 }).map((_, i) => (
               <Star
                 key={i}
                 className={`w-3.5 h-3.5 ${
-                  i < Math.floor(product.rating) ? "fill-current text-yellow-400" : "text-gray-200 "
+                  i < Math.floor(productRating) ? "fill-current text-yellow-400" : "text-gray-200"
                 }`}
               />
             ))}
           </div>
-          <span className="text-[12px] font-bold text-slate-500 ">
-            {/* {product.rating.toFixed(1)} <span className="text-gray-300 dark:text-slate-700 font-normal">({product.reviewsCount || 0})</span> */}
-          </span>
+          {productRating > 0 && (
+            <span className="text-[12px] font-bold text-slate-500 ml-1">
+              {productRating.toFixed(1)}
+            </span>
+          )}
         </div>
 
         {/* Price & Stock Row */}
-        <div className="mt-auto pt-2.5 border-t border-gray-50  flex items-center justify-between">
+        <div className="mt-auto pt-2.5 border-t border-gray-50 flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-lg font-black text-slate-900 ">
-              ₹{product.price.toLocaleString("en-IN")}
+            <span className="text-lg font-black text-slate-900">
+              ₹{productPrice.toLocaleString("en-IN")}
             </span>
-            <span className="text-[11px] font-bold text-green-600  flex items-center gap-1 mt-0.5">
+            <span className="text-[11px] font-bold text-green-600 flex items-center gap-1 mt-0.5">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-              {product.stock} in stock
+              {product.stock || 0} in stock
             </span>
           </div>
 
           {/* Quick Add To Cart Icon-Button */}
           <button
             onClick={(e) => onAddToCart(product, e)}
-            className="bg-orange-50 hover:bg-orange-500 text-orange-600 hover:text-white  p-2.5 rounded-xl transition-all cursor-pointer transform active:scale-95 shadow-sm hover:shadow-md"
+            className="bg-orange-50 hover:bg-orange-500 text-orange-600 hover:text-white p-2.5 rounded-xl transition-all cursor-pointer transform active:scale-95 shadow-sm hover:shadow-md"
             title="Add to Cart"
           >
             <ShoppingCart className="w-4 h-4" />
@@ -94,4 +106,4 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
       </div>
     </div>
   );
-}
+}

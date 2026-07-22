@@ -132,24 +132,24 @@ export default function App() {
   const [isSignupOpen, setIsSignupOpen] = useState(false);
 
   
-//Fetch Prodcuts from backend
-  const [products, setProducts] =useState([]);
+  // Fetch Products from backend (with local PRODUCTS fallback)
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-  fetchProducts();
-      }, []);
+    fetchProducts();
+  }, []);
 
   const fetchProducts = async () => {
     try {
       const res = await getProducts();
-
-      console.log(res); 
-
-      if (res.success) {
+      if (res && res.success && Array.isArray(res.products) && res.products.length > 0) {
         setProducts(res.products);
+      } else {
+        setProducts(PRODUCTS);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Backend products fetch failed, using fallback data:", err);
+      setProducts(PRODUCTS);
     } finally {
       setLoading(false);
     }
@@ -257,7 +257,25 @@ const fetchCart = async () => {
           setIsCartOpen(true);
 };
 
-  // Filtering actions
+  // Filtering actions with live sync
+  const handleCategorySelect = (cat) => {
+    setSelectedCategory(cat);
+    setAppliedFilters((prev) => ({ ...prev, category: cat }));
+    setCurrentPage(1);
+  };
+
+  const handlePriceSelect = (val) => {
+    setPriceRange(val);
+    setAppliedFilters((prev) => ({ ...prev, priceRange: val }));
+    setCurrentPage(1);
+  };
+
+  const handleRatingSelect = (val) => {
+    setMinRating(val);
+    setAppliedFilters((prev) => ({ ...prev, minRating: val }));
+    setCurrentPage(1);
+  };
+
   const handleApplyFilters = () => {
     setAppliedFilters({
       category: selectedCategory,
@@ -266,7 +284,7 @@ const fetchCart = async () => {
     });
     setCurrentPage(1);
     setView("products");
-    showNotification("Filters applied successfully!");
+    showNotification("Filters applied successfully!", "success");
   };
 
   const handleClearFilters = () => {
@@ -278,58 +296,63 @@ const fetchCart = async () => {
       priceRange: 1000000,
       minRating: 0
     });
+    setSearchQuery("");
     setCurrentPage(1);
-    showNotification("All filters reset.");
+    showNotification("All filters reset.", "info");
   };
-const handleViewDetails = (id) => {
-  navigate(`/product/${id}`);
-};
+
+  const handleViewDetails = (id) => {
+    navigate(`/product/${id}`);
+  };
 
   // Filter products dynamically
-const filteredProducts = useMemo(() => {
-  return products.filter((product) => {
-    console.log("Filtering product:")
- 
-  const matchesCategory =
-    appliedFilters.category === "All Categories" ||
-    product.category === appliedFilters.category;
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      // Category match
+      const pCategory = (product.category || "").trim().toLowerCase();
+      const aCategory = (appliedFilters.category || "").trim().toLowerCase();
+      const matchesCategory =
+        appliedFilters.category === "All Categories" ||
+        aCategory === "all categories" ||
+        aCategory === "" ||
+        pCategory === aCategory;
 
- const matchesPrice =
-  (product.discountPrice || product.price) <= appliedFilters.priceRange;
+      // Price match
+      const prodPrice = Number(product.discountPrice ?? product.price ?? 0);
+      const matchesPrice = prodPrice <= Number(appliedFilters.priceRange || 1000000);
 
-  const matchesRating =
-    (product.rating || 0) >= appliedFilters.minRating;
+      // Rating match
+      const prodRating = Number(product.rating || 0);
+      const matchesRating = prodRating >= Number(appliedFilters.minRating || 0);
 
-  const matchesSearch =
-    searchQuery.trim() === "" ||
-    product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.brand?.toLowerCase().includes(searchQuery.toLowerCase());
+      // Search match
+      const q = searchQuery.trim().toLowerCase();
+      const matchesSearch =
+        q === "" ||
+        (product.name && product.name.toLowerCase().includes(q)) ||
+        (product.title && product.title.toLowerCase().includes(q)) ||
+        (product.description && product.description.toLowerCase().includes(q)) ||
+        (product.brand && product.brand.toLowerCase().includes(q)) ||
+        (product.vendor && product.vendor.toLowerCase().includes(q)) ||
+        (product.category && product.category.toLowerCase().includes(q));
 
-  console.log(product.name, {
-    matchesCategory,
-    matchesPrice,
-    matchesRating,
-    matchesSearch,
-  });
-
-  return (
-    matchesCategory &&
-    matchesPrice &&
-    matchesRating &&
-    matchesSearch
-  );
-});
-}, [products, appliedFilters, searchQuery]);
-console.log("Filtered Products:", filteredProducts.length);
-console.log(filteredProducts);
+      return matchesCategory && matchesPrice && matchesRating && matchesSearch;
+    });
+  }, [products, appliedFilters, searchQuery]);
 
   // Sort products dynamically
   const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortBy === "price-low") return a.price - b.price;
-    if (sortBy === "price-high") return b.price - a.price;
-    if (sortBy === "rating") return b.rating - a.rating;
-    return b.reviewsCount - a.reviewsCount; // Default: Popularity / Reviews count
+    const priceA = Number(a.discountPrice ?? a.price ?? 0);
+    const priceB = Number(b.discountPrice ?? b.price ?? 0);
+    const ratingA = Number(a.rating || 0);
+    const ratingB = Number(b.rating || 0);
+    const reviewsA = Number(a.reviewsCount || 0);
+    const reviewsB = Number(b.reviewsCount || 0);
+
+    if (sortBy === "price-low") return priceA - priceB;
+    if (sortBy === "price-high") return priceB - priceA;
+    if (sortBy === "rating") return ratingB - ratingA;
+    return reviewsB - reviewsA; // Default: Popularity / Reviews count
   });
 
   // Paginate products
@@ -450,11 +473,11 @@ const handleLogout = () => {
                 <div className="lg:col-span-3">
                   <SidebarFilters
                     selectedCategory={selectedCategory}
-                    setSelectedCategory={setSelectedCategory}
+                    setSelectedCategory={handleCategorySelect}
                     priceRange={priceRange}
-                    setPriceRange={setPriceRange}
+                    setPriceRange={handlePriceSelect}
                     minRating={minRating}
-                    setMinRating={setMinRating}
+                    setMinRating={handleRatingSelect}
                     onApplyFilters={handleApplyFilters}
                     onClearFilters={handleClearFilters}
                   />
@@ -700,11 +723,11 @@ const handleLogout = () => {
                 </p>
                 <SidebarFilters
                   selectedCategory={selectedCategory}
-                  setSelectedCategory={setSelectedCategory}
+                  setSelectedCategory={handleCategorySelect}
                   priceRange={priceRange}
-                  setPriceRange={setPriceRange}
+                  setPriceRange={handlePriceSelect}
                   minRating={minRating}
-                  setMinRating={setMinRating}
+                  setMinRating={handleRatingSelect}
                   onApplyFilters={handleApplyFilters}
                   onClearFilters={handleClearFilters}
                 />
@@ -825,18 +848,24 @@ const handleLogout = () => {
                             className="bg-white  border border-gray-150 rounded-2xl p-4 flex gap-5 items-center cursor-pointer hover:shadow-lg hover:border-orange-200 transition-all shadow-sm"
                           >
                             <img
-                              src={product.thumbnail?.url || product.images?.[0]?.url}
-                              alt={product.name}
-                              className="w-24 h-24 rounded-xl object-cover"
+                              src={
+                                product.thumbnail?.url ||
+                                (typeof product.images?.[0] === "string"
+                                  ? product.images[0]
+                                  : product.images?.[0]?.url) ||
+                                "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800"
+                              }
+                              alt={product.name || product.title}
+                              className="w-24 h-24 rounded-xl object-cover shrink-0"
                               referrerPolicy="no-referrer"
                             />
                             <div className="flex-1 flex flex-col gap-1 pr-4">
-                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{product.vendor}</span>
-                              <h3 className="text-sm font-bold text-slate-800  line-clamp-1">{product.title}</h3>
-                              <p className="text-xs text-slate-400  line-clamp-2 leading-relaxed mt-0.5">{product.description}</p>
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{product.brand || product.vendor}</span>
+                              <h3 className="text-sm font-bold text-slate-800 line-clamp-1">{product.name || product.title}</h3>
+                              <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mt-0.5">{product.description}</p>
                               <div className="flex items-center gap-3 mt-1.5">
-                                <span className="text-base font-black text-slate-950 ">₹{product.price}</span>
-                                <span className="text-xs text-green-600 font-bold">{product.stock} in stock</span>
+                                <span className="text-base font-black text-slate-950">₹{Number(product.discountPrice ?? product.price ?? 0).toLocaleString("en-IN")}</span>
+                                <span className="text-xs text-green-600 font-bold">{product.stock || 0} in stock</span>
                               </div>
                             </div>
                             <button
