@@ -56,14 +56,15 @@ export default function SignupPage({ onSignupSuccess, onSwitchToLogin }) {
       name: `${payload.firstName} ${payload.lastName}`,
     });
 
-  } catch (err) {
-    console.log(err);
+  }catch (err) {
+  console.error(err);
 
-    alert(
-      err?.response?.data?.message ||
-      "Signup failed"
-    );
-  }
+  return user.status(500).json({
+    success: false,
+    message: err.message,
+    error: err,
+  });
+}
 };
 
   const inputClass =
