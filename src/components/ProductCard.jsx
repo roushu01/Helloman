@@ -2,8 +2,6 @@ import React from "react";
 import { Star, ShoppingCart, Eye } from "lucide-react";
 
 
-
-
 export default function ProductCard({ product, onViewDetails, onAddToCart }) {
   return (
     <div

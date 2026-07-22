@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import HeroCarousel from "./components/HeroCarousel";
+import NewArrivals from "./components/NewArrivals";
 import SidebarFilters from "./components/SidebarFilters";
 import ProductCard from "./components/ProductCard";
 import ProductDetails from "./components/ProductDetails";
@@ -19,29 +20,54 @@ import SellerDashboard from "./seller/SellerDashboard";
 import {resetPassword} from "./api/authApi";
 import { getProducts } from "./api/ProductApi";
 
-import { Grid, List, ChevronDown, CheckCircle, ArrowRight } from "lucide-react";
+import { Grid, List, ChevronDown, CheckCircle, ArrowRight, Store } from "lucide-react";
+import { Routes, Route, useNavigate, useLocation, useParams, Navigate } from "react-router-dom";
 
 export default function App() {
-   const path = window.location.pathname;
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const isResetPassword = path.startsWith("/reset-password/");
-    const resetToken = isResetPassword
-      ? path.split("/reset-password/")[1]
-      : "";
+  // Map the current path to currentView for compatibility
+  const getCompatibleView = () => {
+    const pathname = location.pathname;
+    if (pathname === "/") return "home";
+    if (pathname.startsWith("/products")) return "products";
+    if (pathname.startsWith("/product/")) return "product-detail";
+    if (pathname.startsWith("/about")) return "about";
+    if (pathname.startsWith("/contact")) return "contact";
+    if (pathname.startsWith("/seller-dashboard")) return "seller-dashboard";
+    if (pathname.startsWith("/seller")) return "seller";
+    if (pathname.startsWith("/profile")) return "profile";
+    if (pathname.startsWith("/login")) return "login";
+    if (pathname.startsWith("/signup")) return "signup";
+    if (pathname.startsWith("/reset-password")) return "reset-password";
+    return "home";
+  };
 
+  const currentView = getCompatibleView();
 
-      //Seller login
-     const onSellerLogin= (user) => {
-        if (user.role === "seller") {
-          setLoggedInUser(user);
-          setView("seller-dashboard");
-        } else {
-          alert("You are not authorized to access the seller dashboard.");
-        }
-      };
-  // Navigation & View State
- 
-  const [currentView, setView] = useState("home"); // "home", "products", "about", "contact", "seller"
+  // Compatibility function for legacy setView
+  const setView = (view) => {
+    if (view === "home") {
+      navigate("/");
+    } else if (view === "product-detail") {
+      if (selectedProduct) navigate(`/product/${selectedProduct._id}`);
+      else navigate("/products");
+    } else {
+      navigate(`/${view}`);
+    }
+  };
+
+  // Seller login
+  const onSellerLogin = (user) => {
+    if (user.role === "seller") {
+      setLoggedInUser(user);
+      navigate("/seller-dashboard");
+    } else {
+      alert("You are not authorized to access the seller dashboard.");
+    }
+  };
+
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   // Cart State
@@ -75,7 +101,14 @@ export default function App() {
 
   // Authentication State
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [loggedInUser, setLoggedInUser] = useState(null);
+  const [loggedInUser, setLoggedInUser] = useState(() => {
+    try {
+      const user = localStorage.getItem("user");
+      return user ? JSON.parse(user) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [isSignupOpen, setIsSignupOpen] = useState(false);
 
   
@@ -90,7 +123,7 @@ export default function App() {
     try {
       const res = await getProducts();
 
-      console.log(res);
+      console.log(res); 
 
       if (res.success) {
         setProducts(res.products);
@@ -229,16 +262,7 @@ const fetchCart = async () => {
     showNotification("All filters reset.");
   };
 const handleViewDetails = (id) => {
-  console.log("Clicked:", id);
-
-  const prod = products.find((p) => p._id === id);
-
-  console.log("Found:", prod);
-
-  if (prod) {
-    setSelectedProduct(prod);
-    setView("product-detail");
-  }
+  navigate(`/product/${id}`);
 };
 useEffect(() => {
   const token = localStorage.getItem("token");
@@ -330,9 +354,7 @@ console.log(filteredProducts);
   setCartItems([]);
   setView("home");
 };
-if (isResetPassword) {
-  return <ResetPassword token={resetToken} />;
-}
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 transition-colors duration-200">
       {/* Interactive Global Alerts */}
@@ -372,40 +394,294 @@ if (isResetPassword) {
       />
       )}
 
-      {/* Main Container */}
-      <main className="flex-1 pb-16">
-        {currentView === "profile" && (
-           <Profile user={loggedInUser}
-           onLogout={handleLogout}
-           />
-        )}
-        {currentView === "home" && (
-          <div className="flex flex-col gap-10">
-            {/* Image Banner Carousel */}
-            <HeroCarousel
-              onSlideClick={(cat) => {
-                setSelectedCategory(cat);
-                setAppliedFilters({
-                  category: cat,
-                  priceRange: 1000000,
-                  minRating: 0
-                });
-                setView("products");
-                window.scrollTo({ top: 520, behavior: "smooth" });
-              }}
-            />
-
-            {/* Catalog Split Layout */}
-            <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex flex-col ">
-            <h1 className="text-3xl  font-bold text-slate-900 ">Products</h1>
-            <h1 className="text-md text-slate-600 ">
-              {products.length} found
-            </h1>
-            </div>
-            <div className="max-w-7xl mx-auto px-1  w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-start -mt-6">
-              {/* Left filter panel */}
+      {/* Main Container */}      <main className="flex-1 pb-16">
+        <Routes>
+          <Route path="/" element={
+            <div className="flex flex-col gap-10">
+              {/* Image Banner Carousel */}
+              <HeroCarousel
+                onSlideClick={(cat) => {
+                  setSelectedCategory(cat);
+                  setAppliedFilters({
+                    category: cat,
+                    priceRange: 1000000,
+                    minRating: 0
+                  });
+                  navigate("/products");
+                  window.scrollTo({ top: 520, behavior: "smooth" });
+                }}
+              />
               
+              {/* New Arrivals sliding section */}
+              <NewArrivals
+                products={products}
+                onViewDetails={handleViewDetails}
+                onAddToCart={handleAddToCart}
+              />
+
+              {/* Catalog Split Layout */}
+              <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex flex-col ">
+                <div className="flex items-center gap-2.5">
+                  <Store className="w-8 h-8 text-orange-500" />
+                  <h1 className="text-3xl font-semibold text-slate-900">Products</h1>
+                </div>
+                <h1 className="text-md text-slate-600 mt-1">
+                  {products.length} products available
+                </h1>
+              </div>
+              <div className="max-w-7xl mx-auto px-1  w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-start -mt-6">
+                {/* Left filter panel */}
+                <div className="lg:col-span-3">
+                  <SidebarFilters
+                    selectedCategory={selectedCategory}
+                    setSelectedCategory={setSelectedCategory}
+                    priceRange={priceRange}
+                    setPriceRange={setPriceRange}
+                    minRating={minRating}
+                    setMinRating={setMinRating}
+                    onApplyFilters={handleApplyFilters}
+                    onClearFilters={handleClearFilters}
+                  />
+                </div>
+
+                {/* Right products pane */}
+                <div className="lg:col-span-9 flex flex-col gap-6">
+                  {/* Section header controls */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-150 pb-5">
+                    <div></div>
+
+                    {/* Grid/List View & Sort Controls */}
+                    <div className="flex items-center gap-3.5 self-end sm:self-auto">
+                      {/* View selectors */}
+                      <div className="flex items-center border border-gray-200  bg-white  rounded-lg p-1 shadow-xs">
+                        <button
+                          onClick={() => setIsGridView(true)}
+                          className={`p-1.5 rounded-md cursor-pointer transition-all ${
+                            isGridView
+                              ? "bg-blue-600 text-white shadow-xs"
+                              : "text-slate-400 hover:text-slate-600"
+                          }`}
+                        >
+                          <Grid className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setIsGridView(false)}
+                          className={`p-1.5 rounded-md cursor-pointer transition-all ${
+                            !isGridView
+                              ? "bg-blue-600 text-white shadow-xs"
+                              : "text-slate-400 hover:text-slate-600 "
+                          }`}
+                        >
+                          <List className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Sort Selector Dropdown */}
+                      <div className="relative">
+                        <button
+                          onClick={() => setShowSortDropdown(!showSortDropdown)}
+                          className="bg-white  border border-gray-200  rounded-lg py-2 px-3.5 text-xs font-bold text-slate-700  flex items-center gap-2 shadow-xs cursor-pointer hover:border-gray-300"
+                        >
+                          <span>
+                            Sort by:{" "}
+                            {sortBy === "popularity"
+                              ? "Popularity"
+                              : sortBy === "price-low"
+                              ? "Price: Low to High"
+                              : sortBy === "price-high"
+                              ? "Price: High to Low"
+                              : "Highest Rated"}
+                          </span>
+                          <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                        </button>
+
+                        {showSortDropdown && (
+                          <>
+                            <div className="fixed inset-0 z-10" onClick={() => setShowSortDropdown(false)} />
+                            <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-150  rounded-xl shadow-xl z-20 py-2 text-xs">
+                              {[
+                                { id: "popularity", label: "Popularity" },
+                                { id: "price-low", label: "Price: Low to High" },
+                                { id: "price-high", label: "Price: High to Low" },
+                                { id: "rating", label: "Highest Rated" }
+                              ].map((opt) => (
+                                <button
+                                  key={opt.id}
+                                  onClick={() => {
+                                    setSortBy(opt.id);
+                                    setShowSortDropdown(false);
+                                  }}
+                                  className="w-full text-left px-4 py-2 hover:bg-orange-50 hover:text-orange-600  text-slate-700 "
+                                >
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Main Product Display Area */}
+                  {sortedProducts.length === 0 ? (
+                    <div className="bg-white  border border-gray-150  rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-4 shadow-sm h-80">
+                      <p className="text-sm font-bold text-slate-500 ">
+                        No matching products found.
+                      </p>
+                      <button
+                        onClick={handleClearFilters}
+                        className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition-all cursor-pointer"
+                      >
+                        Reset All Filters
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Grid view */}
+                      {isGridView ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 ml-10 md:grid-cols-3 gap-6">
+                          {paginatedProducts.map((product) => (
+                            <ProductCard
+                              key={product._id}
+                              product={product}
+                              onViewDetails={handleViewDetails}
+                              onAddToCart={(product, e) => {
+                                e.stopPropagation();
+                                handleAddToCart(product, 1);
+                              }}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        /* List view alternate layout */
+                        <div className="flex flex-col gap-4">
+                          {paginatedProducts.map((product) => (
+                            <div
+                              key={product._id}
+                              onClick={() => handleViewDetails(product._id)}
+                              className="bg-white  border border-gray-150  rounded-2xl p-4 flex gap-5 items-center cursor-pointer hover:shadow-lg hover:border-orange-200 transition-all shadow-sm"
+                            >
+                              <img
+                                src={product.thumbnail?.url || product.images?.[0]?.url}
+                                alt={product.name}
+                                className="w-24 h-24 rounded-xl object-cover"
+                                referrerPolicy="no-referrer"
+                              />
+                              <div className="flex-1 flex flex-col gap-1 pr-4">
+                                <span className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">{product.brand}</span>
+                                <h3 className="text-sm font-bold text-slate-800  line-clamp-1">{product.name}</h3>
+                                <p className="text-xs text-slate-400  line-clamp-2 leading-relaxed mt-0.5">{product.description}</p>
+                                <div className="flex items-center gap-3 mt-1.5">
+                                  <span className="text-base font-black text-slate-950">₹{product.price}</span>
+                                  <span className="text-xs text-green-600 font-bold">{product.stock} in stock</span>
+                                </div>
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAddToCart(product, 1);
+                                }}
+                                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl"
+                              >
+                                Add to Cart
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Pagination buttons */}
+                      {totalPages > 1 && (
+                        <div className="flex items-center justify-center gap-2 mt-8" id="pagination-controls">
+                          <button
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                            className="bg-white hover:bg-gray-50 0 border border-gray-250  py-2 px-4 rounded-lg text-xs font-bold text-slate-600  disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                          >
+                            Previous
+                          </button>
+                          {Array.from({ length: totalPages }).map((_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setCurrentPage(i + 1)}
+                              className={`py-2 px-4 rounded-lg text-xs font-black border transition-all cursor-pointer ${
+                                currentPage === i + 1
+                                  ? "bg-blue-600 border-blue-600 text-white"
+                                  : "bg-white  hover:bg-gray-50  border-gray-250 text-slate-700 "
+                              }`}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
+                          <button
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                            className="bg-white  hover:bg-gray-50  border border-gray-250 py-2 px-4 rounded-lg text-xs font-bold text-slate-600  disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Recent Products Row */}
+              <div className="border-t border-gray-100   pb-4 max-w-7xl mx-auto px-4 md:px-8 w-full" id="recent-products-shelf">
+                <div className="flex justify-between items-baseline mb-6">
+                  <div>
+                    <h2 className="text-xl font-black text-slate-950  tracking-tight">Recent Products</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Brand new collections fresh from Jaipur workshops</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setAppliedFilters({ category: "All Categories", priceRange: 1000000, minRating: 0 });
+                      navigate("/products");
+                    }}
+                    className="text-xs font-bold text-blue-600 hover:text-orange-500 flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <span>View All</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                 {products
+                .filter((product) => {
+                  const createdDate = new Date(product.createdAt);
+                  const today = new Date();
+                  const diffInDays = (today - createdDate) / (1000 * 60 * 60 * 24);
+                  return diffInDays <= 2;
+                })
+                .slice(0, 4)
+                .map((product) => (
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    onViewDetails={handleViewDetails}
+                    onAddToCart={(product, e) => {
+                      e.stopPropagation();
+                      handleAddToCart(product, 1);
+                    }}
+                  />
+                ))}
+                </div>
+              </div>
+            </div>
+          } />
+
+          <Route path="/products" element={
+            <div className="max-w-7xl mx-auto px-4 md:px-8 pt-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
               <div className="lg:col-span-3">
+                <div className="flex items-center gap-2 ml-5">
+                  <Store className="w-5 h-5 text-orange-500" />
+                  <span className="text-lg font-bold text-slate-900 tracking-tight">Catalogue</span>
+                </div>
+                <p className="text-md text-slate-400 ml-5 mt-1">
+                  {filteredProducts.length} products available
+                </p>
                 <SidebarFilters
                   selectedCategory={selectedCategory}
                   setSelectedCategory={setSelectedCategory}
@@ -418,24 +694,21 @@ if (isResetPassword) {
                 />
               </div>
 
-              {/* Right products pane */}
-              <div className="lg:col-span-9 flex flex-col gap-6">
-                {/* Section header controls */}
+              {/* Right products grid */}
+              <div className="ml-5 lg:col-span-9 flex flex-col gap-6">
+                {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-150 pb-5">
-                  <div>
-                    
-                  </div>
+                  <div></div>
 
-                  {/* Grid/List View & Sort Controls */}
-                  <div className="flex items-center gap-3.5 self-end sm:self-auto">
-                    {/* View selectors */}
-                    <div className="flex items-center border border-gray-200  bg-white  rounded-lg p-1 shadow-xs">
+                  {/* Grid vs List & Sort */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center border border-gray-200 bg-white  rounded-lg p-1 shadow-xs">
                       <button
                         onClick={() => setIsGridView(true)}
                         className={`p-1.5 rounded-md cursor-pointer transition-all ${
                           isGridView
                             ? "bg-blue-600 text-white shadow-xs"
-                            : "text-slate-400 hover:text-slate-600"
+                            : "text-slate-400 hover:text-slate-600 "
                         }`}
                       >
                         <Grid className="w-4 h-4" />
@@ -445,21 +718,20 @@ if (isResetPassword) {
                         className={`p-1.5 rounded-md cursor-pointer transition-all ${
                           !isGridView
                             ? "bg-blue-600 text-white shadow-xs"
-                            : "text-slate-400 hover:text-slate-600 "
+                            : "text-slate-400 hover:text-slate-600"
                         }`}
                       >
                         <List className="w-4 h-4" />
                       </button>
                     </div>
 
-                    {/* Sort Selector Dropdown */}
                     <div className="relative">
                       <button
                         onClick={() => setShowSortDropdown(!showSortDropdown)}
-                        className="bg-white  border border-gray-200  rounded-lg py-2 px-3.5 text-xs font-bold text-slate-700  flex items-center gap-2 shadow-xs cursor-pointer hover:border-gray-300"
+                        className="bg-white  border border-gray-200 rounded-lg py-2 px-3.5 text-xs font-bold text-slate-700  flex items-center gap-2 shadow-xs cursor-pointer hover:border-gray-300"
                       >
                         <span>
-                          Sort by:{" "}
+                          Sort:{" "}
                           {sortBy === "popularity"
                             ? "Popularity"
                             : sortBy === "price-low"
@@ -474,7 +746,7 @@ if (isResetPassword) {
                       {showSortDropdown && (
                         <>
                           <div className="fixed inset-0 z-10" onClick={() => setShowSortDropdown(false)} />
-                          <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-150  rounded-xl shadow-xl z-20 py-2 text-xs">
+                          <div className="absolute right-0 mt-2 w-48 bg-white  border border-gray-150 d rounded-xl shadow-xl z-20 py-2 text-xs">
                             {[
                               { id: "popularity", label: "Popularity" },
                               { id: "price-low", label: "Price: Low to High" },
@@ -487,7 +759,7 @@ if (isResetPassword) {
                                   setSortBy(opt.id);
                                   setShowSortDropdown(false);
                                 }}
-                                className="w-full text-left px-4 py-2 hover:bg-orange-50 hover:text-orange-600  text-slate-700 "
+                                className="w-full text-left px-4 py-2 hover:bg-orange-50 hover:text-orange-600  text-slate-700  animate-fade-in"
                               >
                                 {opt.label}
                               </button>
@@ -499,11 +771,11 @@ if (isResetPassword) {
                   </div>
                 </div>
 
-                {/* Main Product Display Area */}
+                {/* Products Area */}
                 {sortedProducts.length === 0 ? (
-                  <div className="bg-white  border border-gray-150  rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-4 shadow-sm h-80">
+                  <div className="bg-white  border border-gray-150 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-4 shadow-sm h-80">
                     <p className="text-sm font-bold text-slate-500 ">
-                      No matching products found.
+                      No products matched your specified parameters.
                     </p>
                     <button
                       onClick={handleClearFilters}
@@ -514,9 +786,8 @@ if (isResetPassword) {
                   </div>
                 ) : (
                   <>
-                    {/* Grid view */}
                     {isGridView ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 ml-10 md:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         {paginatedProducts.map((product) => (
                           <ProductCard
                             key={product._id}
@@ -530,26 +801,25 @@ if (isResetPassword) {
                         ))}
                       </div>
                     ) : (
-                      /* List view alternate layout */
                       <div className="flex flex-col gap-4">
                         {paginatedProducts.map((product) => (
                           <div
                             key={product._id}
                             onClick={() => handleViewDetails(product._id)}
-                            className="bg-white  border border-gray-150  rounded-2xl p-4 flex gap-5 items-center cursor-pointer hover:shadow-lg hover:border-orange-200 transition-all shadow-sm"
+                            className="bg-white  border border-gray-150 rounded-2xl p-4 flex gap-5 items-center cursor-pointer hover:shadow-lg hover:border-orange-200 transition-all shadow-sm"
                           >
                             <img
-                                src={product.thumbnail?.url || product.images?.[0]?.url}
-                                alt={product.name}
+                              src={product.thumbnail?.url || product.images?.[0]?.url}
+                              alt={product.name}
                               className="w-24 h-24 rounded-xl object-cover"
                               referrerPolicy="no-referrer"
                             />
                             <div className="flex-1 flex flex-col gap-1 pr-4">
-                              <span className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">{product.brand}</span>
-                              <h3 className="text-sm font-bold text-slate-800  line-clamp-1">{product.name}</h3>
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{product.vendor}</span>
+                              <h3 className="text-sm font-bold text-slate-800  line-clamp-1">{product.title}</h3>
                               <p className="text-xs text-slate-400  line-clamp-2 leading-relaxed mt-0.5">{product.description}</p>
                               <div className="flex items-center gap-3 mt-1.5">
-                                <span className="text-base font-black text-slate-950">₹{product.price}</span>
+                                <span className="text-base font-black text-slate-950 ">₹{product.price}</span>
                                 <span className="text-xs text-green-600 font-bold">{product.stock} in stock</span>
                               </div>
                             </div>
@@ -567,13 +837,12 @@ if (isResetPassword) {
                       </div>
                     )}
 
-                    {/* Pagination buttons */}
                     {totalPages > 1 && (
-                      <div className="flex items-center justify-center gap-2 mt-8" id="pagination-controls">
+                      <div className="flex items-center justify-center gap-2 mt-8">
                         <button
                           disabled={currentPage === 1}
                           onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                          className="bg-white hover:bg-gray-50 0 border border-gray-250  py-2 px-4 rounded-lg text-xs font-bold text-slate-600  disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                          className="bg-white  hover:bg-gray-50  border border-gray-250 py-2 px-4 rounded-lg text-xs font-bold text-slate-600  disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                         >
                           Previous
                         </button>
@@ -603,287 +872,66 @@ if (isResetPassword) {
                 )}
               </div>
             </div>
+          } />
 
-            {/* Recent Products Row matching screenshots */}
-            <div className="border-t border-gray-100   pb-4 max-w-7xl mx-auto px-4 md:px-8 w-full" id="recent-products-shelf">
-              <div className="flex justify-between items-baseline mb-6">
-                <div>
-                  <h2 className="text-xl font-black text-slate-950  tracking-tight">Recent Products</h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Brand new collections fresh from Jaipur workshops</p>
-                </div>
-                <button
-                  onClick={() => {
-                    setAppliedFilters({ category: "All Categories", priceRange: 1000000, minRating: 0 });
-                    setView("products");
-                  }}
-                  className="text-xs font-bold text-blue-600 hover:text-orange-500 flex items-center gap-1 cursor-pointer transition-colors"
-                >
-                  <span>View All</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-               {products
-              .filter((product) => {
-                const createdDate = new Date(product.createdAt);
-                const today = new Date();
-
-                // Difference in days
-                const diffInDays =
-                  (today - createdDate) / (1000 * 60 * 60 * 24);
-
-                return diffInDays <= 2; // Products added in the last 2 days
-              })
-              .slice(0, 4)
-              .map((product) => (
-                <ProductCard
-                  key={product._id}
-                  product={product}
-                  onViewDetails={handleViewDetails}
-                  onAddToCart={(product, e) => {
-                    e.stopPropagation();
-                    handleAddToCart(product, 1);
-                  }}
-                />
-            ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Catalog page view */}
-        {currentView === "products" && (
-          <div className="max-w-7xl mx-auto px-4 md:px-8 pt-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-           
-              
-            
-            <div className="lg:col-span-3">
-              <span className="text-lg ml-5 font-bold text-slate-900  tracking-tight">Products</span>
-              <p className="text-md text-slate-400 ml-5">
-                {filteredProducts.length} items
-              </p>
-              <SidebarFilters
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-                priceRange={priceRange}
-                setPriceRange={setPriceRange}
-                minRating={minRating}
-                setMinRating={setMinRating}
-                onApplyFilters={handleApplyFilters}
-                onClearFilters={handleClearFilters}
-              />
-            </div>
-
-            {/* Right products grid */}
-            <div className="ml-5 lg:col-span-9 flex flex-col gap-6">
-              {/* Header */}
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-150 pb-5">
-               <div></div>
-
-                {/* Grid vs List & Sort */}
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center border border-gray-200 bg-white  rounded-lg p-1 shadow-xs">
-                    <button
-                      onClick={() => setIsGridView(true)}
-                      className={`p-1.5 rounded-md cursor-pointer transition-all ${
-                        isGridView
-                          ? "bg-blue-600 text-white shadow-xs"
-                          : "text-slate-400 hover:text-slate-600 "
-                      }`}
-                    >
-                      <Grid className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setIsGridView(false)}
-                      className={`p-1.5 rounded-md cursor-pointer transition-all ${
-                        !isGridView
-                          ? "bg-blue-600 text-white shadow-xs"
-                          : "text-slate-400 hover:text-slate-600"
-                      }`}
-                    >
-                      <List className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowSortDropdown(!showSortDropdown)}
-                      className="bg-white  border border-gray-200 rounded-lg py-2 px-3.5 text-xs font-bold text-slate-700  flex items-center gap-2 shadow-xs cursor-pointer hover:border-gray-300"
-                    >
-                      <span>
-                        Sort:{" "}
-                        {sortBy === "popularity"
-                          ? "Popularity"
-                          : sortBy === "price-low"
-                          ? "Price: Low to High"
-                          : sortBy === "price-high"
-                          ? "Price: High to Low"
-                          : "Highest Rated"}
-                      </span>
-                      <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-                    </button>
-
-                    {showSortDropdown && (
-                      <>
-                        <div className="fixed inset-0 z-10" onClick={() => setShowSortDropdown(false)} />
-                        <div className="absolute right-0 mt-2 w-48 bg-white  border border-gray-150 d rounded-xl shadow-xl z-20 py-2 text-xs">
-                          {[
-                            { id: "popularity", label: "Popularity" },
-                            { id: "price-low", label: "Price: Low to High" },
-                            { id: "price-high", label: "Price: High to Low" },
-                            { id: "rating", label: "Highest Rated" }
-                          ].map((opt) => (
-                            <button
-                              key={opt.id}
-                              onClick={() => {
-                                setSortBy(opt.id);
-                                setShowSortDropdown(false);
-                              }}
-                              className="w-full text-left px-4 py-2 hover:bg-orange-50 hover:text-orange-600  text-slate-700  animate-fade-in"
-                            >
-                              {opt.label}
-                            </button>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Products Area */}
-              {sortedProducts.length === 0 ? (
-                <div className="bg-white  border border-gray-150 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-4 shadow-sm h-80">
-                  <p className="text-sm font-bold text-slate-500 ">
-                    No products matched your specified parameters.
-                  </p>
-                  <button
-                    onClick={handleClearFilters}
-                    className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition-all cursor-pointer"
-                  >
-                    Reset All Filters
-                  </button>
-                </div>
-              ) : (
-                <>
-                  {isGridView ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                      {paginatedProducts.map((product) => (
-                        <ProductCard
-                          key={product._id}
-                          product={product}
-                          onViewDetails={handleViewDetails}
-                          onAddToCart={(product, e) => {
-                            e.stopPropagation();
-                            handleAddToCart(product, 1);
-                          }}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-4">
-                      {paginatedProducts.map((product) => (
-                        <div
-                          key={product._id}
-                          onClick={() => handleViewDetails(product._id)}
-                          className="bg-white  border border-gray-150 rounded-2xl p-4 flex gap-5 items-center cursor-pointer hover:shadow-lg hover:border-orange-200 transition-all shadow-sm"
-                        >
-                          <img
-                            src={product.thumbnail?.url || product.images?.[0]?.url}
-                            alt={product.name}
-                            className="w-24 h-24 rounded-xl object-cover"
-                            referrerPolicy="no-referrer"
-                          />
-                          <div className="flex-1 flex flex-col gap-1 pr-4">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{product.vendor}</span>
-                            <h3 className="text-sm font-bold text-slate-800  line-clamp-1">{product.title}</h3>
-                            <p className="text-xs text-slate-400  line-clamp-2 leading-relaxed mt-0.5">{product.description}</p>
-                            <div className="flex items-center gap-3 mt-1.5">
-                              <span className="text-base font-black text-slate-950 ">₹{product.price}</span>
-                              <span className="text-xs text-green-600 font-bold">{product.stock} in stock</span>
-                            </div>
-                          </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddToCart(product, 1);
-                            }}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl"
-                          >
-                            Add to Cart
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {totalPages > 1 && (
-                    <div className="flex items-center justify-center gap-2 mt-8">
-                      <button
-                        disabled={currentPage === 1}
-                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                        className="bg-white  hover:bg-gray-50  border border-gray-250 py-2 px-4 rounded-lg text-xs font-bold text-slate-600  disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                      >
-                        Previous
-                      </button>
-                      {Array.from({ length: totalPages }).map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setCurrentPage(i + 1)}
-                          className={`py-2 px-4 rounded-lg text-xs font-black border transition-all cursor-pointer ${
-                            currentPage === i + 1
-                              ? "bg-blue-600 border-blue-600 text-white"
-                              : "bg-white  hover:bg-gray-50  border-gray-250 text-slate-700 "
-                          }`}
-                        >
-                          {i + 1}
-                        </button>
-                      ))}
-                      <button
-                        disabled={currentPage === totalPages}
-                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                        className="bg-white  hover:bg-gray-50  border border-gray-250 py-2 px-4 rounded-lg text-xs font-bold text-slate-600  disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                      >
-                        Next
-                      </button>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Product Details page */}
-        {currentView === "product-detail" && selectedProduct && (
-          <ProductDetails
-            product={selectedProduct}
-            onBack={() => {
-              setView("home");
-              setSelectedProduct(null);
-            }}
-             
-            onAddToCart={(product, quantity) => handleAddToCart(product, quantity)}
-            
-          />
-        )}
-
-        {/* About Us View */}
-        {currentView === "about" && <AboutUs />}
-
-        {/* Contact Us View */}
-        {currentView === "contact" && <ContactUs />}
-
-        {/* Seller Registration Portal View */}
-        {currentView === "seller" && (
-            <SellerRegister
-              onSellerLogin={onSellerLogin}
+          <Route path="/product/:productId" element={
+            <ProductDetailsWrapper
+              products={products}
+              handleAddToCart={handleAddToCart}
             />
-          )}
-        {currentView === "seller-dashboard" && loggedInUser && loggedInUser.role === "seller" && (
-          <SellerDashboard user={loggedInUser} />
-        )}
+          } />
+
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/contact" element={<ContactUs />} />
+
+          <Route path="/seller" element={
+            <SellerRegister onSellerLogin={onSellerLogin} />
+          } />
+
+          <Route path="/seller-dashboard" element={
+            loggedInUser && loggedInUser.role === "seller" ? (
+              <SellerDashboard user={loggedInUser} />
+            ) : (
+              <Navigate to="/seller" replace />
+            )
+          } />
+
+          <Route path="/profile" element={
+            loggedInUser ? (
+              <Profile user={loggedInUser} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          } />
+
+          <Route path="/login" element={
+            <LoginPage
+              onLoginSuccess={(user) => {
+                if (user.role === "seller") {
+                  setLoggedInUser(user);
+                  navigate("/seller-dashboard");
+                } else {
+                  handleLoginSuccess(user);
+                }
+              }}
+              onSwitchToSignup={() => navigate("/signup")}
+            />
+          } />
+
+          <Route path="/signup" element={
+            <SignupPage
+              onSignupSuccess={(user) => {
+                setLoggedInUser(user);
+                showNotification("Account created successfully!");
+                navigate("/");
+              }}
+              onSwitchToLogin={() => navigate("/login")}
+            />
+          } />
+
+          <Route path="/reset-password" element={<ResetPasswordWrapper />} />
+          <Route path="/reset-password/:token" element={<ResetPasswordWrapper />} />
+        </Routes>
       </main>
 
       {/* Cart Drawer Overlay */}
@@ -896,62 +944,28 @@ if (isResetPassword) {
         onClearCart={handleClearCart}
       />
 
-     {/* Login Page */}
-
-        {currentView === "login" && (
-          <LoginPage
-              onLoginSuccess={(user) => {
-                  if (user.role === "seller") {
-                      setLoggedInUser(user);
-                      setView("seller-dashboard");
-                  } else {
-                      handleLoginSuccess(user);
-                  }
-              }}
-              onSwitchToSignup={() => setView("signup")}
-          />
-        )}
-
-          {/* Signup Page */}
-          {currentView === "signup" && (
-            <SignupPage
-              onSignupSuccess={(user) => {
-                setLoggedInUser(user);
-                showNotification("Account created successfully!");
-                setView("home");
-              }}
-              onSwitchToLogin={() => {
-                setView("login");
-              }}
-            />
-          )}
-                    {isSignupOpen && (
-            <div className="fixed inset-0 z-50 bg-black/50 overflow-y-auto">
-              <div className="min-h-screen flex items-center justify-center p-4">
-
-                <div className="relative">
-
-                  <button
-                    onClick={() => setIsSignupOpen(false)}
-                    className="absolute top-4 right-4 z-10 text-gray-500 hover:text-black"
-                  >
-                    ✕
-                  </button>
-
-                  <SignupPage
-                    onSignupSuccess={handleSignupSuccess}
-                    onSwitchToLogin={() => {
-                      setIsSignupOpen(false);
-                      setIsLoginOpen(true);
-                    }}
-                  />
-
-                </div>
-
-              </div>
+      {isSignupOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 overflow-y-auto">
+          <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="relative">
+              <button
+                onClick={() => setIsSignupOpen(false)}
+                className="absolute top-4 right-4 z-10 text-gray-500 hover:text-black"
+              >
+                ✕
+              </button>
+              <SignupPage
+                onSignupSuccess={handleSignupSuccess}
+                onSwitchToLogin={() => {
+                  setIsSignupOpen(false);
+                  setIsLoginOpen(true);
+                }}
+              />
             </div>
-            )}
-     
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
       <Footer
         setView={(v) => {
@@ -965,4 +979,35 @@ if (isResetPassword) {
       />
     </div>
   );
+}
+
+// Router dynamic helper wrappers for param-dependent pages
+function ProductDetailsWrapper({ products, handleAddToCart }) {
+  const { productId } = useParams();
+  const navigate = useNavigate();
+  const product = products.find(p => p._id === productId);
+
+  if (!product) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-16 text-center">
+        <p className="text-lg font-semibold text-slate-700">Product not found.</p>
+        <button onClick={() => navigate("/")} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg">
+          Go Home
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <ProductDetails
+      product={product}
+      onBack={() => navigate(-1)}
+      onAddToCart={(prod, qty) => handleAddToCart(prod, qty)}
+    />
+  );
+}
+
+function ResetPasswordWrapper() {
+  const { token } = useParams();
+  return <ResetPassword token={token} />;
 }
