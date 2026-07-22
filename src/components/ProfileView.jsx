@@ -5,8 +5,11 @@ import {
   Heart,
   ShoppingCart,
   LogOut,
+  CreditCard,
+  Edit,
+  Trash2
 } from "lucide-react";
-
+import api from "../api/axios";
 import { getCart } from "../api/cartApi";
 import {getOrders} from "../api/OrderApi";
 import { addReview } from "../api/reviewApi";
@@ -19,35 +22,46 @@ export default function Profile({ user, onLogout }) {
   const [orderLoading, setOrderLoading] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
+  const [banks,setBanks] = useState([]);
+  const [bankLoading,setBankLoading] = useState(false);
+  const [showBankForm,setShowBankForm] = useState(false);
+  const [editBankId,setEditBankId] = useState(null);
 
+
+  const [bankForm,setBankForm] = useState({
+    bankName:"",
+    accountHolderName:"",
+    accountNumber:"",
+    ifscCode:"",
+    branchName:"",
+    accountType:"Savings",
+    isPrimary:true
+  });
   const [review, setReview] = useState({
     rating: 5,
     comment: "",
   });
   const handleReviewSubmit = async () => {
   try {
-    const res = await addReview({
+    await addReview({
       productId: selectedProductId,
       rating: review.rating,
       comment: review.comment,
     });
 
-    alert( "Review added");
+    alert("Review submitted successfully");
 
-    setShowReviewModal(false);
-
+    // Reset form
     setReview({
       rating: 5,
       comment: "",
     });
 
+    setSelectedProductId(null);
+    setShowReviewModal(false);
+
   } catch (err) {
     console.error(err);
-
-    alert(
-      err.response?.data ||
-      "Unable to submit review"
-    );
   }
 };
   const fetchCart = async () => {
@@ -96,6 +110,109 @@ useEffect(() => {
     fetchOrders();
   }
 }, [activeTab]);
+const fetchBanks = async()=>{
+
+ try{
+
+   setBankLoading(true);
+
+   const token = localStorage.getItem("token");
+
+   const res = await api.get(
+     "/api/user-banks/all",
+     {
+       headers:{
+         Authorization:`Bearer ${token}`
+       }
+     }
+   );
+
+
+   console.log("Bank API Response:", res.data);
+
+
+   if(res.data.success){
+
+      setBanks(res.data.userBanks);
+
+   }
+
+
+ }
+ catch(err){
+
+   console.log(
+    "Fetch Bank Error:",
+    err.response?.data || err.message
+   );
+
+ }
+ finally{
+
+   setBankLoading(false);
+
+ }
+
+};
+useEffect(()=>{
+
+ if(activeTab==="bank"){
+    fetchBanks();
+ }
+
+},[activeTab]);
+const saveBank = async()=>{
+      try{
+      const token = localStorage.getItem("token");
+      console.log("Sending Bank Data:", bankForm);
+      const res = await api.post(
+      "/api/user-banks",
+      bankForm,
+      {
+        headers:{
+          Authorization:`Bearer ${token}`,
+          "Content-Type":"application/json"
+        }
+      }
+      );
+      console.log("Bank Response:",res.data);
+      alert("Bank added successfully");
+      setShowBankForm(false);
+      setBankForm({
+      bankName:"",
+      accountHolderName:"",
+      accountNumber:"",
+      ifscCode:"",
+      branchName:"",
+      accountType:"Savings",
+      isPrimary:true
+      });
+      fetchBanks();
+      }
+      catch(err){
+      console.log(
+      "Bank Error:",
+      err.response?.data
+      );}};
+const deleteBank = async(id)=>{
+      try{
+      const token = localStorage.getItem("token");
+      await api.delete(
+        `/api/user-banks/${id}`,
+        {
+          headers:{
+            Authorization:`Bearer ${token}`
+          }
+        }
+      );
+      alert("Bank deleted");
+      fetchBanks();
+      }
+      catch(err){
+      console.log(
+      "Delete Bank Error:",
+      err.response?.data || err.message
+      );}};
 
   return (
     <div className="max-w-7xl mx-auto p-8">
@@ -144,7 +261,20 @@ useEffect(() => {
               Cart
             </button>
 
-           
+           <button
+              onClick={()=>setActiveTab("bank")}
+              className={`min-w-max lg:w-full flex items-center gap-2 px-4 py-3 rounded-lg ${
+              activeTab==="bank"
+              ?"bg-orange-500 text-white"
+              :"hover:bg-gray-100"
+              }`}
+              >
+
+              <CreditCard size={20}/>
+
+              Bank Details
+
+              </button>
 
             <button
               onClick={onLogout}
@@ -157,6 +287,7 @@ useEffect(() => {
               <LogOut size={20} />
               Logout
             </button>
+
 
           </div>
 
@@ -269,6 +400,125 @@ useEffect(() => {
   </>
 )}
 
+{activeTab==="bank" && (
+
+<div>
+
+<div className="flex justify-between items-center mb-6">
+
+<h2 className="text-2xl font-bold">
+My Bank Details
+</h2>
+
+
+<button
+
+onClick={()=>setShowBankForm(true)}
+
+className="bg-orange-500 text-white px-5 py-2 rounded-lg"
+
+>
+Add Bank
+</button>
+
+
+</div>
+
+
+
+{
+banks.filter(Boolean).map((bank)=>(
+
+<div
+key={bank._id}
+className="border rounded-xl p-5 mb-5"
+>
+
+
+<h3 className="text-xl font-bold">
+{bank.bankName}
+</h3>
+
+
+<p>
+Account Holder :
+{bank.accountHolderName}
+</p>
+
+
+<p>
+Account Number :
+{bank.accountNumber}
+</p>
+
+
+<p>
+IFSC :
+{bank.ifscCode}
+</p>
+
+
+<p>
+Branch :
+{bank.branchName}
+</p>
+
+
+<p>
+Type :
+{bank.accountType}
+</p>
+
+
+
+<div className="flex gap-3 mt-5">
+
+
+{/* <button
+
+onClick={()=>editBank(bank)}
+
+className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg"
+
+>
+
+<Edit size={16}/>
+Edit
+
+</button> */}
+
+
+
+<button
+
+onClick={()=>deleteBank(bank._id)}
+
+className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg"
+
+>
+
+<Trash2 size={16}/>
+Delete
+
+</button>
+
+
+
+</div>
+
+
+</div>
+
+
+))
+
+}
+
+
+
+</div>
+
+)}
           {activeTab === "cart" && (
   <>
     <h2 className="text-2xl font-bold mb-6">My Cart</h2>
@@ -360,7 +610,14 @@ useEffect(() => {
       <div className="flex justify-end gap-3 mt-6">
 
         <button
-          onClick={() => setShowReviewModal(false)}
+        onClick={() => {
+              setReview({
+                rating: 5,
+                comment: "",
+              });
+              setSelectedProductId(null);
+              setShowReviewModal(false);
+            }}
           className="px-5 py-2 border rounded-lg"
         >
           Cancel
@@ -377,6 +634,97 @@ useEffect(() => {
 
     </div>
   </div>
+)}
+{showBankForm && (
+
+<div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+
+
+<div className="bg-white p-6 rounded-xl w-[450px]">
+
+
+<h2 className="text-xl font-bold mb-5">
+
+{
+editBankId
+?"Edit Bank"
+:"Add Bank"
+}
+
+</h2>
+
+
+
+{
+Object.keys(bankForm)
+.filter(x=>x!=="isPrimary")
+.map(field=>(
+
+<input
+
+key={field}
+
+className="w-full border p-3 rounded-lg mb-3"
+
+placeholder={field}
+
+value={bankForm[field]}
+
+onChange={(e)=>
+
+setBankForm({
+
+...bankForm,
+
+[field]:e.target.value
+
+})
+
+}
+
+/>
+
+))
+
+}
+
+
+
+<div className="flex justify-end gap-3">
+
+
+<button
+
+onClick={()=>setShowBankForm(false)}
+
+className="border px-4 py-2 rounded-lg"
+
+>
+Cancel
+</button>
+
+
+
+<button
+
+onClick={saveBank}
+
+className="bg-orange-500 text-white px-4 py-2 rounded-lg"
+
+>
+
+Save
+
+</button>
+
+
+</div>
+
+
+</div>
+
+</div>
+
 )}
     </div>
   );

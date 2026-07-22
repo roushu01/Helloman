@@ -1,40 +1,143 @@
 // src/seller/Navbar.jsx
 
-import { Bell, UserCircle } from "lucide-react";
+import { useState } from "react";
+import { Bell, UserCircle, LogOut } from "lucide-react";
+import { useClerk } from "@clerk/clerk-react";
 
 export default function Navbar() {
+
+  const [openProfile, setOpenProfile] = useState(false);
+
+  const { signOut } = useClerk();
+
+
+  const handleLogout = async () => {
+
+    try {
+
+      // Remove Clerk session
+      await signOut();
+
+
+      // Remove backend token if stored
+      localStorage.removeItem("token");
+
+      // Remove seller data
+      localStorage.removeItem("seller");
+
+
+      // Optional redirect
+      window.location.href = "/seller-login";
+
+
+    } catch(error){
+
+      console.log("Logout Error:", error);
+
+    }
+
+  };
+
+
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 px-8 py-4 flex justify-end items-center">
 
-      {/* Right Section */}
+
       <div className="flex items-center gap-6">
+
 
         {/* Notification */}
         <button className="relative p-2 rounded-full hover:bg-gray-100 transition">
-          <Bell size={22} />
+
+          <Bell size={22}/>
 
           <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></span>
+
         </button>
 
+
+
         {/* Profile */}
-        <div className="flex items-center gap-3 cursor-pointer">
-          <UserCircle
-            size={42}
-            className="text-orange-500"
-          />
 
-          <div className="hidden md:block">
-            <h3 className="font-semibold text-slate-800">
-              Seller
-            </h3>
+        <div className="relative">
 
-            <p className="text-xs text-gray-500">
-              seller@gmail.com
-            </p>
+
+          <div
+            onClick={() => setOpenProfile(!openProfile)}
+            className="flex items-center gap-3 cursor-pointer"
+          >
+
+            <UserCircle
+              size={42}
+              className="text-orange-500"
+            />
+
+
+            <div className="hidden md:block">
+
+              <h3 className="font-semibold text-slate-800">
+                Seller
+              </h3>
+
+
+              <p className="text-xs text-gray-500">
+                seller@gmail.com
+              </p>
+
+            </div>
+
           </div>
+
+
+
+          {/* Dropdown */}
+
+          {
+            openProfile && (
+
+              <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50">
+
+
+                <div className="px-4 py-3 border-b">
+
+                  <p className="text-sm font-semibold">
+                    Seller Account
+                  </p>
+
+                  <p className="text-xs text-gray-500">
+                    seller@gmail.com
+                  </p>
+
+                </div>
+
+
+
+                <button
+
+                  onClick={handleLogout}
+
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition"
+
+                >
+
+                  <LogOut size={18}/>
+
+                  Logout
+
+                </button>
+
+
+              </div>
+
+            )
+          }
+
+
         </div>
 
+
       </div>
+
 
     </header>
   );

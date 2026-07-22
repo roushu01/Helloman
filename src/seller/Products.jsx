@@ -28,22 +28,29 @@ const fetchProducts = async () => {
   try {
     const data = await getSellerProducts();
 
-    console.log("Products:", data);
+    const products = data.products || [];
+    setProducts(products);
 
-    // adjust according to your API response
-    if (data.success) {
-      setProducts(data.products);
-    } else {
-      setProducts(data);
+    // Check if there is at least one published/active product
+    const hasPublishedProduct = products.some(
+      (product) => product.isActive === true
+      // or product.status === "Published"
+      // depending on your backend
+    );
+
+    if (!hasPublishedProduct) {
+      setActivePage("products");
     }
   } catch (err) {
-    console.error(err);
+    console.error("Fetch products error:", err);
+    setProducts([]);
+    setActivePage("products");
   } finally {
     setLoading(false);
   }
 };
-
-  const filteredProducts = products.filter((product) => {
+const filteredProducts = Array.isArray(products)
+  ? products.filter((product) => {
   const productId = product._id?.toLowerCase() || "";
   const productName = product.name?.toLowerCase() || "";
   const category = product.category || "";
@@ -55,7 +62,7 @@ const fetchProducts = async () => {
     (filters.category === "" || category === filters.category) &&
     (filters.status === "" || status === filters.status)
   );
-});
+}):[];
 
   const resetFilters = () => {
     setFilters({

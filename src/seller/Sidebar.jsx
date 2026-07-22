@@ -58,20 +58,20 @@ export default function Sidebar({ activePage, setActivePage }) {
     ],
   },
 
-  {
-    title: "Basic Details",
-    icon: FolderTree,
-    children: [
-      { title: "Colors", value: "colors" },
-      { title: "Categories", value: "categories" },
-      { title: "Size", value: "size" },
-      { title: "Tags", value: "tags" },
-      { title: "Manufacturer", value: "manufacturer" },
-      { title: "Currency", value: "currency" },
-      { title: "Attachment", value: "attachment" },
-      { title: "Payment Methods", value: "payment-methods" },
-    ],
-  },
+  // {
+  //   title: "Basic Details",
+  //   icon: FolderTree,
+  //   children: [
+  //     { title: "Colors", value: "colors" },
+  //     { title: "Categories", value: "categories" },
+  //     { title: "Size", value: "size" },
+  //     { title: "Tags", value: "tags" },
+  //     { title: "Manufacturer", value: "manufacturer" },
+  //     { title: "Currency", value: "currency" },
+  //     { title: "Attachment", value: "attachment" },
+  //     { title: "Payment Methods", value: "payment-methods" },
+  //   ],
+  // },
 
   {
     title: "User Management",

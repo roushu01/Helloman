@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import api from "../api/axios";
 import {
   Store,
@@ -14,12 +14,27 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-
+import { useClerk } from "@clerk/clerk-react";
+import { useSignUp, useSignIn } from "@clerk/clerk-react";
 export default function SellerRegister({ onSellerLogin }) {
   const [authMode, setAuthMode] = useState("login"); // "login" | "signup"
   const [isRegistered, setIsRegistered] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading,setLoading] = useState(false);
+  const [clerkUserId, setClerkUserId] = useState("");
+  const [isLoggedIn,setIsLoggedIn] = useState(false);
+  const [step, setStep] = useState(1);
+  const { signOut } = useClerk();
+  const {signUp,setActive: setSignUpActive,isLoaded: isSignUpLoaded} = useSignUp();
+  const {
+ signIn,
+ setActive: setSignInActive,
+ isLoaded: isSignInLoaded
+} = useSignIn();
 
+const [email, setEmail] = useState("");
+const [verifyingOtp, setVerifyingOtp] = useState(false);
+const [otp, setOtp] = useState("");
   const [formData, setFormData] = useState({
   firstName: "",
   lastName: "",
@@ -48,62 +63,193 @@ export default function SellerRegister({ onSellerLogin }) {
     bankName: "",
   },
 });
-
+const [otpVerified, setOtpVerified] = useState(false);
+  const [loginEmail,setLoginEmail]=useState("");
+const [loginOtp,setLoginOtp]=useState("");
+const [loginStep,setLoginStep]=useState(1);
   const [loginData, setLoginData] = useState({
     email: "",
-    password: "",
+   
   });
+
+ const sendLoginOtp = async()=>{
+
+  if(!isSignInLoaded) return;
+
+
+  try{
+
+    const result = await signIn.create({
+      identifier: loginEmail,
+    });
+
+
+    console.log("Sign in created:", result);
+
+
+    const emailFactor = result.supportedFirstFactors.find(
+      (factor)=> factor.strategy === "email_code"
+    );
+
+
+    if(!emailFactor){
+      alert("Email OTP is not enabled for this account");
+      return;
+    }
+
+
+    await signIn.prepareFirstFactor({
+
+      strategy:"email_code",
+
+      emailAddressId: emailFactor.emailAddressId
+
+    });
+
+
+    setLoginStep(2);
+
+
+  }catch(err){
+
+    console.log(err);
+
+    alert(
+      err.errors?.[0]?.longMessage ||
+      "Unable to send OTP"
+    );
+
+  }
+
+};
+const handleVerifyOtp = async () => {
+  try {
+    setVerifyingOtp(true);
+
+    await verifyLoginOtp();
+
+  } catch (err) {
+    console.log(err);
+  } finally {
+    setVerifyingOtp(false);
+  }
+};
+
+       const verifyLoginOtp = async()=>{
+
+try{
+
+const result = await signIn.attemptFirstFactor({
+  strategy:"email_code",
+  code:loginOtp
+});
+
+
+
+if(result.status==="complete"){
+
+ await setSignInActive({
+   session: result.createdSessionId
+ });
+
+
+ setIsLoggedIn(true);
+
+
+ onSellerLogin({
+   id: result.userId,
+   role:"seller",
+   email:loginEmail,
+   name:"Seller"
+ });
+
+
+ alert("Login successful");
+
+}
+
+}catch(err){
+
+ console.log(err);
+
+ alert(
+ err.errors?.[0]?.longMessage || "Wrong OTP"
+ );
+
+}
+
+};
+
 const handleRegister = async (e) => {
   e.preventDefault();
 
   const payload = {
-    firstName: formData.firstName,
-    lastName: formData.lastName,
-    email: formData.email,
-    password: formData.password,
-    phone: formData.phone,
 
-    businessName: formData.businessName,
-    businessType: formData.businessType,
+  clerkUserId: clerkUserId,
 
-    gstNumber: formData.gstNumber,
-    panNumber: formData.panNumber,
+  firstName: formData.firstName,
 
-    address: {
-      street: formData.address.street,
-      city: formData.address.city,
-      state: formData.address.state,
-      country: formData.address.country,
-      pincode: formData.address.pincode,
-    },
+  lastName: formData.lastName,
 
-    bankDetails: {
-      accountHolder: formData.bankDetails.accountHolder,
-      accountNumber: formData.bankDetails.accountNumber,
-      ifsc: formData.bankDetails.ifsc,
-      bankName: formData.bankDetails.bankName,
-    },
-  };
+  email: formData.email,
+
+  password: formData.password,
+
+  phone: formData.phone,
+
+  businessName: formData.businessName,
+
+  businessType: formData.businessType,
+
+  gstNumber: formData.gstNumber,
+
+  panNumber: formData.panNumber,
+
+  address: formData.address,
+
+  bankDetails: formData.bankDetails
+
+};
 
   try {
-    const res = await api.post(
-      "api/sellers/register",
-      payload
-    );
 
-    alert("Seller Registered Successfully");
+ const res = await api.post(
+   "/api/sellers/register",
+   payload
+ );
 
-    console.log(res.data);
 
-  } catch (error) {
+ alert("Seller Registered Successfully");
 
-    console.log(error);
 
-    alert(
-      error.response?.data?.message ||
-      "Registration Failed"
-    );
-  }
+ const seller = res.data.seller;
+
+
+ onSellerLogin({
+
+   id: seller._id,
+
+   role:"seller",
+
+   name:`${seller.firstName} ${seller.lastName}`,
+
+   shopName:seller.businessName,
+
+   email:seller.email
+
+ });
+
+
+} catch(error){
+
+ console.log(error);
+
+ alert(
+ error.response?.data?.message ||
+ "Registration Failed"
+ );
+
+}
 };
 
 
@@ -113,7 +259,7 @@ const handleLogin = async (e) => {
   try {
     const response = await api.post("/api/auth/login", {
   email: loginData.email,
-  password: loginData.password,
+ 
 });
 
 console.log(response.data);
@@ -147,9 +293,103 @@ onSellerLogin({
   console.log("Response:", error.response?.data);
 }
 };
+
+
+const sendOtp = async () => {
+
+  if (!email) {
+    alert("Please enter email");
+    return;
+  }
+
+  try {
+
+    setLoading(true);
+
+    await signUp.create({
+      emailAddress: email,
+    });
+
+    await signUp.prepareEmailAddressVerification({
+      strategy: "email_code",
+    });
+
+    setStep(1);
+
+  } catch(err){
+
+    console.log(err);
+    alert(
+      err.errors?.[0]?.longMessage ||
+      "Unable to send OTP"
+    );
+
+  } finally {
+    setLoading(false);
+  }
+};
+
+const verifyOtp = async () => {
+
+  if (!isSignUpLoaded) return;
+
+  try {
+
+    const completeSignUp =
+      await signUp.attemptEmailAddressVerification({
+        code: otp,
+      });
+
+    console.log(completeSignUp);
+
+    if (completeSignUp.status === "complete") {
+
+  await setSignUpActive({
+    session: completeSignUp.createdSessionId,
+  });
+
+
+  setClerkUserId(completeSignUp.createdUserId);
+
+
+  alert("OTP Verified Successfully");
+
+
+  setFormData({
+    ...formData,
+    email,
+  });
+
+
+  setStep(3);
+
+} else {
+
+      alert("Verification not completed");
+
+    }
+
+  } catch(err){
+
+    console.log(err);
+
+    alert(
+      err.errors?.[0]?.longMessage ||
+      "Invalid OTP"
+    );
+
+  }
+
+};
+const changeEmail = () => {
+  setOtp("");
+  setStep(2);
+};
   return (
+
+    
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 flex flex-col gap-10" id="seller-register-page">
-   
+      
         <>
           {/* Intro header with statistics */}
           <div className="flex justify-center  items-center">
@@ -184,88 +424,154 @@ onSellerLogin({
 
               {authMode === "login" ? (
                 /* ---------------- LOGIN FORM ---------------- */
-                <form onSubmit={handleLogin} className="flex flex-col gap-4">
-                  <div className="border-b border-gray-100  pb-3">
-                    <h3 className="text-base font-black text-slate-900  tracking-wider">
-                      Seller Login
-                    </h3>
-                    <p className="text-xs text-slate-400 mt-1">Welcome back! Access your seller dashboard</p>
-                  </div>
+               <form className="space-y-5">
+                        {/* Email */}
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                            Mobile Number or Email
+                          </label>
 
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Mobile Number or Email</label>
-                    <div className="relative">
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                        <Mail className="w-4 h-4" />
-                      </span>
-                      <input
-                        type="text"
-                        required
-                        value={loginData.email}
-                        onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                        placeholder="9829XXXXXX or you@shop.com"
-                        className="w-full text-xs pl-9 pr-3.5 py-2.5 border border-gray-200  rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
-                      />
-                    </div>
-                  </div>
+                          <div className="flex gap-3">
+                            <div className="relative flex-1">
+                              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
 
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Password</label>
-                    <div className="relative">
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                        <Lock className="w-4 h-4" />
-                      </span>
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        required
-                        value={loginData.password}
-                        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                        placeholder="••••••••"
-                        className="w-full text-xs pl-9 pr-9 py-2.5 border border-gray-200   rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 "
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
+                              <input
+                                type="email"
+                                value={loginEmail}
+                                onChange={(e) => setLoginEmail(e.target.value)}
+                                placeholder="Enter email"
+                                className="w-full h-11 pl-11 pr-4 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                              />
+                            </div>
 
-                  <div className="flex justify-between items-center text-[11px]">
-                    <label className="flex items-center gap-1.5 text-slate-500  cursor-pointer">
-                      <input type="checkbox" className="rounded border-gray-300 text-orange-500 focus:ring-orange-500" />
-                      Remember me
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => alert("Password reset link sent! (Simulated)")}
-                      className="text-orange-500 font-bold hover:underline cursor-pointer"
-                    >
-                      Forgot password?
-                    </button>
-                  </div>
+                            {/* Send OTP Button */}
+                            <button
+                              type="button"
+                              onClick={sendLoginOtp}
+                              className="h-11 px-5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-medium whitespace-nowrap transition"
+                            >
+                              Verify OTP
+                            </button>
+                          </div>
+                        </div>
 
-                  <button
-                    type="submit"
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-extrabold py-3.5 rounded-xl shadow-md transition-all cursor-pointer text-xs uppercase tracking-wider mt-2"
-                  >
-                    Login to Dashboard
-                  </button>
+                        {/* OTP Field */}
+                        {loginStep === 2 && (
+                        <div className="flex flex-col gap-1">
+  <label className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+    OTP
+  </label>
 
-                  <p className="text-center text-[11px] text-slate-500 ">
-                    New seller on HelloMem?{" "}
-                    <button
-                      type="button"
-                      onClick={() => setAuthMode("signup")}
-                      className="text-orange-500 font-bold hover:underline cursor-pointer"
-                    >
-                      Create an account
-                    </button>
-                  </p>
-                </form>
+  <div className="flex gap-3">
+    <input
+      type="text"
+      maxLength={6}
+      required
+      value={loginOtp}
+      onChange={(e) => setLoginOtp(e.target.value)}
+      placeholder="Enter 6-digit OTP"
+      className="flex-1 h-11 px-4 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+    />
+
+    <button
+      type="button"
+      onClick={handleVerifyOtp}
+      disabled={
+        verifyingOtp ||
+        otpVerified ||
+        loginOtp.length !== 6
+      }
+      className={`px-5 rounded-lg font-medium text-white transition ${
+        verifyingOtp || otpVerified
+          ? "bg-gray-400 cursor-not-allowed"
+          : "bg-green-600 hover:bg-green-700"
+      }`}
+    >
+      {otpVerified
+        ? "Verified"
+        : verifyingOtp
+        ? "Verifying..."
+        : "Verify OTP"}
+    </button>
+  </div>
+</div>
+                        )}
+                      </form>
               ) : (
+                  step === 1 ? (
+    <>
+        <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8">
+
+          <h2 className="text-2xl font-bold text-center mb-2">
+          Enter Verification Code
+          </h2>
+
+          <p className="text-sm text-gray-500 text-center mb-6">
+          Enter the 6-digit code sent to
+          <br />
+          <span className="font-semibold">{email}</span>
+          </p>
+
+          <input
+          type="text"
+          maxLength={6}
+          placeholder="123456"
+          value={otp}
+          onChange={(e)=>setOtp(e.target.value)}
+          className="w-full border rounded-lg px-4 py-3 text-center tracking-[10px] text-xl font-semibold mb-5 focus:ring-2 focus:ring-orange-500 outline-none"
+          />
+
+          <button
+          type="button"
+          onClick={verifyOtp}
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition"
+          >
+          Verify OTP
+          </button>
+          <button
+            type="button"
+            onClick={changeEmail}
+            className="w-full mt-3 border border-orange-500 text-orange-500 py-3 rounded-lg font-semibold hover:bg-orange-50 transition"
+          >
+            Change Email / Resend OTP
+          </button>
+
+          </div>
+    </>
+                  ):(
+    step === 2 ? (
+    <>
+        <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8">
+
+        <h2 className="text-2xl font-bold text-center mb-2">
+        Verify your Email
+        </h2>
+
+        <p className="text-sm text-gray-500 text-center mb-6">
+        We'll send a verification code to your email.
+        </p>
+
+        <input
+        type="email"
+        placeholder="Enter your email"
+        value={email}
+        onChange={(e)=>setEmail(e.target.value)}
+        className="w-full border rounded-lg px-4 py-3 mb-5 focus:ring-2 focus:ring-orange-500 outline-none"
+        />
+
+        <button
+        type="button"
+        onClick={sendOtp}
+        disabled={loading}
+        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition"
+        >
+        {loading?"Sending...":"Send OTP"}
+        </button>
+
+        </div>
+    </>
+):(
+              
                 /* ---------------- SIGN UP FORM ---------------- */
                <form onSubmit={handleRegister} className="flex flex-col gap-5">
 
@@ -753,7 +1059,7 @@ onSellerLogin({
 
   {/* PASSWORD */}
 
-  <div>
+  {/* <div>
 
     <label className="text-[10px] font-bold uppercase">
       Create Password
@@ -794,7 +1100,7 @@ onSellerLogin({
 
     </div>
 
-  </div>
+  </div> */}
     <button
     type="submit"
     className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-all mt-4"
@@ -814,6 +1120,9 @@ onSellerLogin({
   </p>
 
 </form>
+)
+
+                  )
               )}
             </div>
           </div>

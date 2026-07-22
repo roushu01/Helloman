@@ -19,9 +19,10 @@ import ResetPassword from "./components/ResetPassword";
 import SellerDashboard from "./seller/SellerDashboard";
 import {resetPassword} from "./api/authApi";
 import { getProducts } from "./api/ProductApi";
-
+import { useClerk } from "@clerk/clerk-react";
 import { Grid, List, ChevronDown, CheckCircle, ArrowRight, Store } from "lucide-react";
 import { Routes, Route, useNavigate, useLocation, useParams, Navigate } from "react-router-dom";
+
 
 export default function App() {
   const navigate = useNavigate();
@@ -44,6 +45,7 @@ export default function App() {
     return "home";
   };
 
+  const { signOut } = useClerk();
   const currentView = getCompatibleView();
 
   // Compatibility function for legacy setView
@@ -61,6 +63,8 @@ export default function App() {
   // Seller login
   const onSellerLogin = (user) => {
     if (user.role === "seller") {
+      if (user.clerkId) localStorage.setItem("clerkId", user.clerkId);
+      localStorage.setItem("user", JSON.stringify(user));
       setLoggedInUser(user);
       navigate("/seller-dashboard");
     } else {
@@ -68,6 +72,22 @@ export default function App() {
     }
   };
 
+  const handleSellerLoginPage = async () => {
+    try {
+      if (signOut) await signOut();
+    } catch (e) {
+      console.error("Clerk signout error:", e);
+    }
+
+    localStorage.removeItem("sellerClerkId");
+    localStorage.removeItem("clerkId");
+    localStorage.removeItem("user");
+
+    setLoggedInUser(null);
+    setCartItems([]);
+
+    setView("seller");
+  };
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   // Cart State
@@ -264,14 +284,7 @@ const fetchCart = async () => {
 const handleViewDetails = (id) => {
   navigate(`/product/${id}`);
 };
-useEffect(() => {
-  const token = localStorage.getItem("token");
-  const user = localStorage.getItem("user");
 
-  if (token && user) {
-    setLoggedInUser(JSON.parse(user));
-  }
-}, []);
   // Filter products dynamically
 const filteredProducts = useMemo(() => {
   return products.filter((product) => {
@@ -346,9 +359,11 @@ console.log(filteredProducts);
   );
 };
 
-  const handleLogout = () => {
-  localStorage.removeItem("token");
+const handleLogout = () => {
+
   localStorage.removeItem("user");
+  localStorage.removeItem("sellerClerkId");
+  localStorage.removeItem("clerkId");
 
   setLoggedInUser(null);
   setCartItems([]);
@@ -383,6 +398,7 @@ console.log(filteredProducts);
           setSelectedCategory(cat);
           setAppliedFilters((prev) => ({ ...prev, category: cat }));
         }}
+         onSellerLogin={handleSellerLoginPage}
         cartCount={cartCount}
         openCart={handleOpenCart}
         searchQuery={searchQuery.trim()}
