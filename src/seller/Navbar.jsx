@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Bell, UserCircle, LogOut } from "lucide-react";
 import { useClerk } from "@clerk/clerk-react";
 
-export default function Navbar() {
+export default function Navbar(user,onLogout) {
 
   const [openProfile, setOpenProfile] = useState(false);
 
@@ -13,30 +13,30 @@ export default function Navbar() {
 
   const handleLogout = async () => {
 
-    try {
+  try {
 
-      // Remove Clerk session
-      await signOut();
-
-
-      // Remove backend token if stored
-      localStorage.removeItem("token");
-
-      // Remove seller data
-      localStorage.removeItem("seller");
+    await signOut();
 
 
-      // Optional redirect
-      window.location.href = "/seller-login";
+    // Remove all authentication data
+    localStorage.removeItem("token");
+    localStorage.removeItem("seller");
+    localStorage.removeItem("user");
+    localStorage.removeItem("clerkId");
+    localStorage.removeItem("sellerClerkId");
 
 
-    } catch(error){
+    // redirect
+    window.location.href = "/";
 
-      console.log("Logout Error:", error);
 
-    }
+  } catch(error){
 
-  };
+    console.log("Logout Error:", error);
+
+  }
+
+};
 
 
   return (

@@ -36,7 +36,7 @@ export default function App() {
 
     localStorage.setItem("clerkId", user.clerkId);
     localStorage.setItem("user", JSON.stringify(user));
-
+    
     setLoggedInUser(user);
     setView("seller-dashboard");
 
@@ -135,6 +135,23 @@ const handleSellerLoginPage = async () => {
     setTimeout(() => setNotification(null), 3500);
   };
 
+  useEffect(() => {
+
+  const savedUser = localStorage.getItem("user");
+
+  if(savedUser){
+
+    const user = JSON.parse(savedUser);
+
+    setLoggedInUser(user);
+
+    if(user.role === "seller"){
+      setView("seller-dashboard");
+    }
+
+  }
+
+}, []);
   // Cart operations
   const handleAddToCart = async (product, quantity = 1) => {
   try {
@@ -336,15 +353,31 @@ console.log(filteredProducts);
   );
 };
 
-const handleLogout = () => {
+const handleLogout = async()=>{
 
-  localStorage.removeItem("user");
-  localStorage.removeItem("sellerClerkId");
-  localStorage.removeItem("clerkId");
 
-  setLoggedInUser(null);
-  setCartItems([]);
-  setView("home");
+ try{
+
+   await signOut();
+
+ }catch(err){
+
+   console.log(err);
+
+ }
+
+
+ localStorage.removeItem("user");
+ localStorage.removeItem("clerkId");
+ localStorage.removeItem("sellerClerkId");
+
+
+ setLoggedInUser(null);
+
+ setCartItems([]);
+
+ setView("home");
+
 };
 if (isResetPassword) {
   return <ResetPassword token={resetToken} />;
@@ -898,9 +931,12 @@ if (isResetPassword) {
               onSellerLogin={onSellerLogin}
             />
           )}
-        {currentView === "seller-dashboard" && loggedInUser && loggedInUser.role === "seller" && (
-          <SellerDashboard user={loggedInUser} />
-        )}
+        {currentView === "seller-dashboard" && loggedInUser?.role === "seller" && (
+              <SellerDashboard 
+                  user={loggedInUser}
+                  onLogout={handleLogout}
+              />
+            )}
       </main>
 
       {/* Cart Drawer Overlay */}

@@ -137,48 +137,70 @@ const handleVerifyOtp = async () => {
 
        const verifyLoginOtp = async()=>{
 
-try{
+        try{
 
-const result = await signIn.attemptFirstFactor({
-  strategy:"email_code",
-  code:loginOtp
-});
-
-
-
-if(result.status==="complete"){
-
- await setSignInActive({
-   session: result.createdSessionId
- });
+        const result = await signIn.attemptFirstFactor({
+        strategy:"email_code",
+        code:loginOtp
+        });
 
 
- setIsLoggedIn(true);
+
+        if(result.status==="complete"){
+
+        await setSignInActive({
+          session: result.createdSessionId
+        });
 
 
- onSellerLogin({
-   id: result.userId,
-   role:"seller",
-   email:loginEmail,
-   name:"Seller"
- });
+        setIsLoggedIn(true);
 
 
- alert("Login successful");
+        const sellerUser = {
 
-}
+            id: result.userId,
 
-}catch(err){
+            clerkId: result.userId,
 
- console.log(err);
+            role:"seller",
 
- alert(
- err.errors?.[0]?.longMessage || "Wrong OTP"
- );
+            email:loginEmail,
 
-}
+            name:"Seller"
 
-};
+          };
+
+
+          localStorage.setItem(
+            "clerkId",
+            result.userId
+          );
+
+
+          localStorage.setItem(
+            "user",
+            JSON.stringify(sellerUser)
+          );
+
+
+          onSellerLogin(sellerUser);
+
+
+        alert("Login successful");
+
+        }
+
+        }catch(err){
+
+        console.log(err);
+
+        alert(
+        err.errors?.[0]?.longMessage || "Wrong OTP"
+        );
+
+        }
+
+        };
 
 const handleRegister = async (e) => {
   e.preventDefault();
@@ -227,17 +249,19 @@ const handleRegister = async (e) => {
 
  onSellerLogin({
 
-   id: seller._id,
+ id: seller._id,
 
-   role:"seller",
+ clerkId: clerkUserId,
 
-   name:`${seller.firstName} ${seller.lastName}`,
+ role:"seller",
 
-   shopName:seller.businessName,
+ name:`${seller.firstName} ${seller.lastName}`,
 
-   email:seller.email
+ shopName:seller.businessName,
 
- });
+ email:seller.email
+
+});
 
 
 } catch(error){

@@ -8,7 +8,7 @@ import {
   Trash2,
   Plus,
 } from "lucide-react";
-
+import EditUser from "./EditUser";
 export default function Users({
   setActivePage,
   setSelectedUser,
@@ -341,13 +341,31 @@ export default function Users({
                       <Pencil size={18} />
                     </button>
 
-                    <button className="p-2 rounded-lg bg-red-100 hover:bg-red-200">
-                      <Trash2 size={18} />
-                    </button>
+                    <button
+                  onClick={()=>{
+                      alert(`Delete ${user.name}`)
+                  }}
+                  className="p-2 rounded-lg bg-red-100 hover:bg-red-200"
+                  >
+                  <Trash2 size={18}/>
+                  </button>
                   </div>
                 </td>
               </tr>
             ))}
+            {
+            activePage === "edit-user" && (
+
+              <EditUser
+
+                  selectedUser={selectedUser}
+
+                  setActivePage={setActivePage}
+
+              />
+
+            )
+            }
 
             {filteredUsers.length === 0 && (
               <tr>

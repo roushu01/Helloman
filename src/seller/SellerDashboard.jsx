@@ -35,7 +35,7 @@ import ImageUpload from "./ImageUpload";
 import AddVariant from "./AddVarient";
 import EditProduct from "./EditProduct";
 
-export default function SellerDashboard() {
+export default function SellerDashboard(user,onLogout) {
   const [activePage, setActivePage] = useState("dashboard");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -175,7 +175,10 @@ export default function SellerDashboard() {
       <div className="flex-1 flex flex-col">
 
         {/* Top Navbar */}
-        <Navbar />
+        <Navbar 
+          user={user}
+          onLogout={onLogout}
+        />
 
         {/* Content */}
         <main className="flex-1 p-6 overflow-y-auto">
