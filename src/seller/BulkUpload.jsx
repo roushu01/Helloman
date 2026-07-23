@@ -242,7 +242,7 @@ const fetchHistory = async () => {
         </td>
 
         <td className="p-4">
-          {new Date(item.createdAt).toLocaleDateString()}
+          {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "-"}
         </td>
 
         <td className="p-4">

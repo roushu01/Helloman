@@ -74,7 +74,7 @@ export default function Analytics() {
           <Users className="text-blue-500 mb-3" size={34} />
           <p className="text-gray-500">Visitors</p>
           <h2 className="text-3xl font-bold">
-            {stats.visitors.toLocaleString()}
+            {(stats?.visitors ?? 0).toLocaleString()}
           </h2>
         </div>
 
@@ -90,7 +90,7 @@ export default function Analytics() {
           <IndianRupee className="text-green-500 mb-3" size={34} />
           <p className="text-gray-500">Revenue</p>
           <h2 className="text-3xl font-bold">
-            ₹{stats.revenue.toLocaleString()}
+            ₹{(stats?.revenue ?? 0).toLocaleString()}
           </h2>
         </div>
 
@@ -157,7 +157,7 @@ export default function Analytics() {
               </div>
 
               <div className="font-semibold">
-                ₹{item.revenue.toLocaleString()}
+                ₹{(item?.revenue ?? 0).toLocaleString()}
               </div>
 
             </div>
@@ -216,7 +216,7 @@ export default function Analytics() {
                 </td>
 
                 <td className="p-3 font-semibold text-green-600">
-                  ₹{item.revenue.toLocaleString()}
+                  ₹{(item?.revenue ?? 0).toLocaleString()}
                 </td>
 
               </tr>

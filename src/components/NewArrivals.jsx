@@ -219,11 +219,11 @@ export default function NewArrivals({ products, onViewDetails, onAddToCart }) {
                     <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between">
                       <div className="flex flex-col">
                         <span className="text-lg font-black text-slate-900">
-                          ₹{currentPrice.toLocaleString("en-IN")}
+                          ₹{(currentPrice ?? 0).toLocaleString("en-IN")}
                         </span>
                         {originalPrice !== null && (
                           <span className="text-[10px] text-slate-400 line-through">
-                            ₹{originalPrice.toLocaleString("en-IN")}
+                            ₹{(originalPrice ?? 0).toLocaleString("en-IN")}
                           </span>
                         )}
                       </div>

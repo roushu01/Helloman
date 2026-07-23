@@ -88,11 +88,11 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
           <div className="flex flex-col">
             <div className="flex items-baseline gap-1.5">
               <span className="text-lg font-black text-slate-900">
-                ₹{price.toLocaleString("en-IN")}
+                ₹{(price ?? 0).toLocaleString("en-IN")}
               </span>
               {originalPrice && originalPrice > price && (
                 <span className="text-xs text-slate-400 line-through">
-                  ₹{originalPrice.toLocaleString("en-IN")}
+                  ₹{(originalPrice ?? 0).toLocaleString("en-IN")}
                 </span>
               )}
             </div>

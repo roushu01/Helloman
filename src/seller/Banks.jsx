@@ -1,6 +1,4 @@
-// src/seller/Banks.jsx
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Search,
   RotateCcw,
@@ -8,6 +6,14 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
+import { api } from "../api/axios";
+
+// Helper to safely read cookies in browser JavaScript
+const getCookie = (name) => {
+  if (typeof document === "undefined") return "";
+  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+  return match ? decodeURIComponent(match[2]) : "";
+};
 
 export default function Banks({
   setActivePage,
@@ -22,49 +28,52 @@ export default function Banks({
     fromDate: "",
     toDate: "",
   });
+  const [banks, setBanks] = useState([]);
 
-  const [banks] = useState([
-    {
-      id: "B001",
-      name: "State Bank of India",
-      ifsc: "SBIN0001234",
-      country: "India",
-      branch: 22000,
-      status: "Active",
-    },
-    {
-      id: "B002",
-      name: "HDFC Bank",
-      ifsc: "HDFC0004321",
-      country: "India",
-      branch: 7600,
-      status: "Active",
-    },
-    {
-      id: "B003",
-      name: "ICICI Bank",
-      ifsc: "ICIC0005678",
-      country: "India",
-      branch: 5900,
-      status: "Inactive",
-    },
-  ]);
+  const getbanks = async () => {
+    try {
+      // Extract session token from cookies or localStorage
+      const token =
+        getCookie("__session") ||
+        getCookie("_session") ||
+        getCookie("token") ||
+        localStorage.getItem("token");
 
-  const filteredBanks = banks.filter((bank) => {
+      const headers = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const res = await api.get("/api/banks", { headers });
+      console.log("Banks API response:", res);
+
+      const data = Array.isArray(res.data)
+        ? res.data
+        : res.data?.banks || res.data?.data || res.data?.userBanks || [];
+
+      setBanks(data);
+    } catch (error) {
+      console.error("Error fetching banks:", error);
+    }
+  };
+
+  useEffect(() => {
+    getbanks();
+  }, []);
+
+  const filteredBanks = (Array.isArray(banks) ? banks : []).filter((bank) => {
+    const bankId = String(bank.id || bank.bankId || bank.bankCode || bank._id || "");
+    const bankName = String(bank.name || bank.bankName || "");
+    const ifsc = String(bank.ifsc || bank.ifscCode || "");
+    const country = String(bank.country || "India");
+    const status = String(bank.status || "Active");
+
     return (
-      bank.id
-        .toLowerCase()
-        .includes(filters.bankId.toLowerCase()) &&
-      bank.name
-        .toLowerCase()
-        .includes(filters.bankName.toLowerCase()) &&
-      bank.ifsc
-        .toLowerCase()
-        .includes(filters.ifsc.toLowerCase()) &&
-      (filters.country === "" ||
-        bank.country === filters.country) &&
-      (filters.status === "" ||
-        bank.status === filters.status)
+      bankId.toLowerCase().includes((filters.bankId || "").toLowerCase()) &&
+      bankName.toLowerCase().includes((filters.bankName || "").toLowerCase()) &&
+      ifsc.toLowerCase().includes((filters.ifsc || "").toLowerCase()) &&
+      (filters.country === "" || country === filters.country) &&
+      (filters.status === "" || status === filters.status)
     );
   });
 
@@ -254,7 +263,7 @@ export default function Banks({
             </button>
 
             <button
-             
+
               className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg flex items-center gap-2"
             >
               <Search size={18} />
@@ -319,11 +328,10 @@ export default function Banks({
                 <td className="p-4">
 
                   <span
-                    className={`px-3 py-1 rounded-full text-sm ${
-                      bank.status === "Active"
+                    className={`px-3 py-1 rounded-full text-sm ${bank.status === "Active"
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
-                    }`}
+                      }`}
                   >
                     {bank.status}
                   </span>

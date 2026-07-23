@@ -32,7 +32,7 @@ export default function Cart({
 
   if (!isOpen) return null;
 
-  const total = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
+  const total = cartItems.reduce((acc, item) => acc + (item?.product?.price || 0) * (item?.quantity || 1), 0);
 
 const handleCheckoutSubmit = async (e) => {
   e.preventDefault();
@@ -171,7 +171,7 @@ const handleCheckoutSubmit = async (e) => {
                             {/* Total price & delete */}
                             <div className="flex items-center gap-3">
                               <span className="text-sm font-black text-slate-950 ">
-                                ₹{(item.product.price * item.quantity).toLocaleString("en-IN")}
+                                ₹{((item?.product?.price || 0) * (item?.quantity || 1)).toLocaleString("en-IN")}
                               </span>
                               <button
                                 onClick={() => onRemoveItem(item.product._id)}
@@ -191,7 +191,7 @@ const handleCheckoutSubmit = async (e) => {
                       <div className="flex justify-between items-center text-sm font-bold text-slate-800 ">
                         <span>Subtotal:</span>
                         <span className="text-base font-black text-orange-500">
-                          ₹{total.toLocaleString("en-IN")}
+                          ₹{(total ?? 0).toLocaleString("en-IN")}
                         </span>
                       </div>
                       <p className="text-[11px] text-slate-400 leading-snug">
@@ -401,7 +401,7 @@ const handleCheckoutSubmit = async (e) => {
                   </div>
                   <div className="flex justify-between border-t border-dashed border-gray-200 pt-2 font-bold text-slate-800 ">
                     <span>Amount Payable (COD):</span>
-                    <span className="text-orange-500 font-extrabold">₹{total > 0 ? total.toLocaleString("en-IN") : "543"}</span>
+                    <span className="text-orange-500 font-extrabold">₹{total > 0 ? (total ?? 0).toLocaleString("en-IN") : "543"}</span>
                   </div>
                 </div>
 

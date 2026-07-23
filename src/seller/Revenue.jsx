@@ -77,7 +77,7 @@ export default function Revenue() {
           <IndianRupee className="text-green-600 mb-4" size={35} />
           <p className="text-gray-500">Total Revenue</p>
           <h2 className="text-3xl font-bold mt-2">
-            ₹{stats.totalRevenue.toLocaleString()}
+            ₹{(stats?.totalRevenue ?? 0).toLocaleString()}
           </h2>
         </div>
 
@@ -85,7 +85,7 @@ export default function Revenue() {
           <TrendingUp className="text-blue-600 mb-4" size={35} />
           <p className="text-gray-500">Monthly Revenue</p>
           <h2 className="text-3xl font-bold mt-2">
-            ₹{stats.monthlyRevenue.toLocaleString()}
+            ₹{(stats?.monthlyRevenue ?? 0).toLocaleString()}
           </h2>
         </div>
 
@@ -93,7 +93,7 @@ export default function Revenue() {
           <Wallet className="text-orange-500 mb-4" size={35} />
           <p className="text-gray-500">Today's Revenue</p>
           <h2 className="text-3xl font-bold mt-2">
-            ₹{stats.todayRevenue.toLocaleString()}
+            ₹{(stats?.todayRevenue ?? 0).toLocaleString()}
           </h2>
         </div>
 
@@ -210,7 +210,7 @@ export default function Revenue() {
                 </td>
 
                 <td className="p-3 font-bold text-green-600">
-                  ₹{product.revenue.toLocaleString()}
+                  ₹{(product?.revenue ?? 0).toLocaleString()}
                 </td>
 
               </tr>

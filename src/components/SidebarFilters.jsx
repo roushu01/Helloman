@@ -63,7 +63,7 @@ export default function SidebarFilters({
             Price Range
           </h3>
           <span className="text-xs font-bold text-blue-500 bg-blue-50 :bg-blue-950/40 px-2.5 py-1 rounded-full">
-            Max: ₹{priceRange.toLocaleString("en-IN")}
+            Max: ₹{(priceRange ?? 0).toLocaleString("en-IN")}
           </span>
         </div>
         <div className="px-1 flex flex-col gap-2">
