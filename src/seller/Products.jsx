@@ -1,7 +1,7 @@
 import React, { useState,useEffect } from "react";
 import { Search, RotateCcw, Plus, Pencil, Trash2 } from "lucide-react";
 
-import { getSellerProducts } from "../api/ProductApi";
+import { getSellerProducts,deleteProduct } from "../api/ProductApi";
 
 export default function Products({
   setActivePage,
@@ -48,6 +48,40 @@ const fetchProducts = async () => {
   } finally {
     setLoading(false);
   }
+};
+const handleDelete = async (id) => {
+
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this product?"
+  );
+
+  if (!confirmDelete) return;
+
+
+  try {
+
+    const res = await deleteProduct(id);
+
+    alert(
+      res.message || "Product deleted successfully"
+    );
+
+
+    // refresh product list
+    fetchProducts();
+
+
+  } catch (err) {
+
+    console.log("Delete Error:", err);
+
+    alert(
+      err.response?.data?.message ||
+      "Failed to delete product"
+    );
+
+  }
+
 };
 const filteredProducts = Array.isArray(products)
   ? products.filter((product) => {
@@ -321,9 +355,12 @@ const filteredProducts = Array.isArray(products)
                         <Pencil size={18} />
                       </button>
 
-                    <button className="p-2 bg-red-100 rounded-lg hover:bg-red-200">
-                      <Trash2 size={18} />
-                    </button>
+                    <button
+            onClick={() => handleDelete(product._id)}
+            className="p-2 bg-red-100 rounded-lg hover:bg-red-200 text-red-600"
+          >
+            <Trash2 size={18} />
+          </button>
 
                   </div>
 

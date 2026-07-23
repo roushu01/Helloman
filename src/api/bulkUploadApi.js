@@ -3,7 +3,7 @@ import api from "./axios";
  // change to your endpoint
 
 export const uploadProductsExcel = async (file) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("clerkId");
 
   const formData = new FormData();
   formData.append("file", file);
@@ -18,7 +18,7 @@ export const uploadProductsExcel = async (file) => {
   return data;
 };
 export const getBulkUploadHistory = async () => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("clerkId");
 
   const res = await api.get("/api/bulk-upload/history", {
     headers: {

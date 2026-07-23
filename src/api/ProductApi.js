@@ -53,8 +53,8 @@ export const updateProduct = async (id, productData) => {
   try {
     const clerkId = localStorage.getItem("clerkId");
 
-    const response = await api.put(
-      `/api/products/${id}`,
+    const response = await api.patch(
+      `/api/products/${id}/stock`,
       productData,
       {
         headers: {
@@ -69,3 +69,19 @@ export const updateProduct = async (id, productData) => {
     throw err;
   }
 };
+export const deleteProduct = async (id) => {
+
+  const clerkId = localStorage.getItem("clerkId");
+
+  const response = await api.delete(
+    `/api/products/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${clerkId}`,
+      },
+    }
+  );
+
+  return response.data;
+};
+
