@@ -10,7 +10,9 @@ import {
 } from "lucide-react";
 import EditUser from "./EditUser";
 export default function Users({
+  activePage,
   setActivePage,
+  selectedUser,
   setSelectedUser,
 }) {
   const [filters, setFilters] = useState({

@@ -19,6 +19,7 @@ export const addReview = async (reviewData) => {
 
 export const getSellerReviews = async (filters = {}) => {
   const token = localStorage.getItem("clerkId");
+  console.log("Review:",token)
 
   const res = await api.get("/api/reviews/seller", {
     headers: {

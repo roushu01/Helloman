@@ -19,6 +19,7 @@ export const uploadProductsExcel = async (file) => {
 };
 export const getBulkUploadHistory = async () => {
   const token = localStorage.getItem("clerkId");
+  console.log(token)
 
   const res = await api.get("/api/bulk-upload/history", {
     headers: {

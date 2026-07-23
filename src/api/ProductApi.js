@@ -7,14 +7,14 @@ export const getProducts = async () => {
 
 export const createProduct = async (productData) => {
   try {
-    const user = JSON.parse(localStorage.getItem("user"));
+     const clerkId = localStorage.getItem("clerkId");
 
     const response = await api.post(
       "/api/products",
       productData,
       {
         headers: {
-          Authorization: `Bearer ${user.clerkId}`,
+          Authorization: `Bearer ${clerkId}`,
         },
       }
     );
@@ -30,11 +30,11 @@ export const createProduct = async (productData) => {
 
 export const getSellerProducts = async () => {
   try {
-    const user = JSON.parse(localStorage.getItem("user"));
+     const clerkId = localStorage.getItem("clerkId");
 
     const response = await api.get("/api/products", {
       headers: {
-        Authorization: `Bearer ${user.clerkId}`,
+        Authorization: `Bearer ${clerkId}`,
       },
     });
 
