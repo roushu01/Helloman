@@ -285,44 +285,42 @@ const handleViewDetails = (id) => {
   navigate(`/product/${id}`);
 };
 
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, priceRange, minRating, searchQuery]);
+
   // Filter products dynamically
-const filteredProducts = useMemo(() => {
-  return products.filter((product) => {
-    console.log("Filtering product:")
- 
-  const matchesCategory =
-    appliedFilters.category === "All Categories" ||
-    product.category === appliedFilters.category;
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      const prodCategory = (product.category || "").trim().toLowerCase();
+      const filterCategory = (selectedCategory || "All Categories").trim().toLowerCase();
 
- const matchesPrice =
-  (product.discountPrice || product.price) <= appliedFilters.priceRange;
+      const matchesCategory =
+        filterCategory === "all categories" || prodCategory === filterCategory;
 
-  const matchesRating =
-    (product.rating || 0) >= appliedFilters.minRating;
+      const prodPrice = Number(product.discountPrice || product.price || 0);
+      const matchesPrice = prodPrice <= Number(priceRange || 1000000);
 
-  const matchesSearch =
-    searchQuery.trim() === "" ||
-    product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.brand?.toLowerCase().includes(searchQuery.toLowerCase());
+      const prodRating = Number(product.rating || 0);
+      const matchesRating = prodRating >= Number(minRating || 0);
 
-  console.log(product.name, {
-    matchesCategory,
-    matchesPrice,
-    matchesRating,
-    matchesSearch,
-  });
+      const query = searchQuery.trim().toLowerCase();
+      const matchesSearch =
+        query === "" ||
+        (product.name || product.title || "").toLowerCase().includes(query) ||
+        (product.description || "").toLowerCase().includes(query) ||
+        (product.brand || product.vendor || "").toLowerCase().includes(query) ||
+        (product.category || "").toLowerCase().includes(query);
 
-  return (
-    matchesCategory &&
-    matchesPrice &&
-    matchesRating &&
-    matchesSearch
-  );
-});
-}, [products, appliedFilters, searchQuery]);
-console.log("Filtered Products:", filteredProducts.length);
-console.log(filteredProducts);
+      return (
+        matchesCategory &&
+        matchesPrice &&
+        matchesRating &&
+        matchesSearch
+      );
+    });
+  }, [products, selectedCategory, priceRange, minRating, searchQuery]);
 
   // Sort products dynamically
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -442,7 +440,7 @@ const handleLogout = () => {
                   <h1 className="text-3xl font-semibold text-slate-900">Products</h1>
                 </div>
                 <h1 className="text-md text-slate-600 mt-1">
-                  {products.length} products available
+                  {filteredProducts.length} products available
                 </h1>
               </div>
               <div className="max-w-7xl mx-auto px-1  w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-start -mt-6">

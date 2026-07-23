@@ -69,7 +69,7 @@ export default function SidebarFilters({
         <div className="px-1 flex flex-col gap-2">
           <input
             type="range"
-            min="0"
+            min="100"
             max="1000000"
             step="100"
             value={priceRange}
@@ -77,7 +77,7 @@ export default function SidebarFilters({
             className="w-full h-1.5 bg-gray-200 :bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500 focus:outline-none"
           />
           <div className="flex justify-between text-xs font-semibold text-slate-400 :text-slate-500">
-            <span>₹0</span>
+            <span>₹100</span>
             <span>₹5,000</span>
             <span>₹10,00000</span>
           </div>
