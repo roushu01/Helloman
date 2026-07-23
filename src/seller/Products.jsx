@@ -311,12 +311,13 @@ const filteredProducts = Array.isArray(products)
                   <div className="flex justify-center gap-2">
 
                     <button
-                        onClick={() => {
-                          setSelectedProduct(product);
-                          setActivePage("edit-product");
-                        }}
-                        className="p-2 bg-blue-100 rounded-lg hover:bg-blue-200"
-                      >
+                              onClick={()=>{
+                                  console.log("Selected Product:",product);
+
+                                  setSelectedProduct(product);
+                                  setActivePage("edit-product");
+                              }}
+                              >
                         <Pencil size={18} />
                       </button>
 

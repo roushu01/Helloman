@@ -62,13 +62,21 @@ export default function SellerDashboard(user,onLogout) {
       case "image-upload":
         return <ImageUpload/>
       case "edit-product":
-        return (
-          <EditProduct
-            product={selectedProduct}
-            setActivePage={setActivePage}
-            
-          />
-        );
+
+  if(!selectedProduct){
+    return (
+      <div className="p-5">
+        Loading product...
+      </div>
+    );
+  }
+
+  return (
+    <EditProduct
+      selectedProduct={selectedProduct}
+      setActivePage={setActivePage}
+    />
+  );
       case "bulk-upload":
         return <BulkUpload />;  
       case "product-reviews":
@@ -156,7 +164,7 @@ export default function SellerDashboard(user,onLogout) {
                 setActivePage={setActivePage}
               />
             );   
-
+      
       default:
         return <DashboardHome />;
     }

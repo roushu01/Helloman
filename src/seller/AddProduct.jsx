@@ -137,10 +137,12 @@ useEffect(() => {
 const handleImageChange = (e) => {
   const files = Array.from(e.target.files);
 
-  setFormData({
-    ...formData,
+  setFormData((prev) => ({
+    ...prev,
     images: files,
-  });
+  }));
+
+  console.log(files);
 };
 const handleSubmit = async (e) => {
   e.preventDefault();

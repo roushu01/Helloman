@@ -1,199 +1,281 @@
-import React, { useState } from "react";
-import { Save, ArrowLeft } from "lucide-react";
+import React, { useState,useEffect } from "react";
+import { updateProduct } from "../api/ProductApi";
 
-export default function EditProduct({product,setActivePage}) {
+export default function EditProduct({
+  selectedProduct,
+  setActivePage,
+}) {
+  const [form, setForm] = useState(null);
 
-  // Dummy product (Later fetch from backend)
 
-  const [formData, setFormData] = useState({
-  name: "Nike Air Max 270",
-  description: "Comfortable running shoes with premium cushioning.",
-  category: "Shoes",
-  price: 8999,
-  stock: 20,
-  image:
-    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500",
-});
+useEffect(() => {
+
+  if(selectedProduct){
+
+    setForm({
+
+      name: selectedProduct.name || "",
+      description: selectedProduct.description || "",
+      shortDescription: selectedProduct.shortDescription || "",
+
+      price: selectedProduct.price || "",
+      discountPrice: selectedProduct.discountPrice || "",
+      mrp: selectedProduct.mrp || "",
+      costPrice: selectedProduct.costPrice || "",
+
+      stock: selectedProduct.stock || "",
+      sku: selectedProduct.sku || "",
+
+      brand:selectedProduct.brand || "",
+
+      shipping:{
+        weight:selectedProduct.shipping?.weight || "",
+        length:selectedProduct.shipping?.length || "",
+        width:selectedProduct.shipping?.width || "",
+        height:selectedProduct.shipping?.height || "",
+      }
+
+    });
+
+  }
+
+},[selectedProduct]);
 
   const handleChange = (e) => {
-    setformData({
-      ...formData,
+    setForm({
+      ...form,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleShipping = (e) => {
+    setForm({
+      ...form,
+      shipping: {
+        ...form.shipping,
+        [e.target.name]: e.target.value,
+      },
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(product);
+    try {
+      await updateProduct(selectedProduct._id, form);
 
-    alert("Product Updated Successfully");
+      alert("Product Updated Successfully");
+
+      setActivePage("products");
+    } catch (err) {
+      alert(
+        err.response?.data?.message ||
+          "Update Failed"
+      );
+    }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="bg-white rounded-xl shadow p-8">
 
-      <div className="flex justify-between items-center">
-
-        <div>
-          <h1 className="text-3xl font-bold">
-            Edit Product
-          </h1>
-
-          <p className="text-gray-500">
-            Update your product information.
-          </p>
-        </div>
-
-        <button
-          className="flex items-center gap-2 border px-4 py-2 rounded-lg hover:bg-gray-100"
-          onClick={() => setActivePage("products")}
-        >
-          <ArrowLeft size={18} />
-          Back
-        </button>
-
-      </div>
+      <h2 className="text-2xl font-bold mb-6">
+        Edit Product
+      </h2>
 
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-xl shadow p-8 space-y-6"
+        className="grid grid-cols-2 gap-5"
       >
 
-        {/* Product Image */}
+        <input
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          placeholder="Product Name"
+          className="border p-3 rounded-lg"
+        />
 
-        <div>
+        <input
+          name="brand"
+          value={form.brand}
+          onChange={handleChange}
+          placeholder="Brand"
+          className="border p-3 rounded-lg"
+        />
 
-          <label className="font-semibold block mb-3">
-            Product Image
-          </label>
+        <textarea
+          name="description"
+          value={form.description}
+          onChange={handleChange}
+          placeholder="Description"
+          className="border p-3 rounded-lg col-span-2"
+        />
 
-          <img
-            src={formData.image}
-            alt=""
-            className="w-48 h-48 object-cover rounded-xl border"
-          />
+        <input
+          name="shortDescription"
+          value={form.shortDescription}
+          onChange={handleChange}
+          placeholder="Short Description"
+          className="border p-3 rounded-lg col-span-2"
+        />
 
-          <input
-            type="file"
-            className="mt-4"
-          />
+        <input
+          name="price"
+          value={form.price}
+          onChange={handleChange}
+          placeholder="Price"
+          className="border p-3 rounded-lg"
+        />
 
-        </div>
+        <input
+          name="discountPrice"
+          value={form.discountPrice}
+          onChange={handleChange}
+          placeholder="Discount Price"
+          className="border p-3 rounded-lg"
+        />
 
-        {/* Name */}
+        <input
+          name="mrp"
+          value={form.mrp}
+          onChange={handleChange}
+          placeholder="MRP"
+          className="border p-3 rounded-lg"
+        />
 
-        <div>
+        <input
+          name="costPrice"
+          value={form.costPrice}
+          onChange={handleChange}
+          placeholder="Cost Price"
+          className="border p-3 rounded-lg"
+        />
 
-          <label className="font-semibold block mb-2">
-            Product Name
-          </label>
+        <input
+          name="stock"
+          value={form.stock}
+          onChange={handleChange}
+          placeholder="Stock"
+          className="border p-3 rounded-lg"
+        />
 
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-3"
-          />
+        <input
+          name="sku"
+          value={form.sku}
+          onChange={handleChange}
+          placeholder="SKU"
+          className="border p-3 rounded-lg"
+        />
 
-        </div>
+        <input
+          name="barcode"
+          value={form.barcode}
+          onChange={handleChange}
+          placeholder="Barcode"
+          className="border p-3 rounded-lg"
+        />
 
-        {/* Description */}
+        <input
+          name="warehouse"
+          value={form.warehouse}
+          onChange={handleChange}
+          placeholder="Warehouse"
+          className="border p-3 rounded-lg"
+        />
 
-        <div>
+        <input
+          name="gst"
+          value={form.gst}
+          onChange={handleChange}
+          placeholder="GST"
+          className="border p-3 rounded-lg"
+        />
 
-          <label className="font-semibold block mb-2">
-            Description
-          </label>
+        <input
+          name="minimumStockAlert"
+          value={form.minimumStockAlert}
+          onChange={handleChange}
+          placeholder="Minimum Stock Alert"
+          className="border p-3 rounded-lg"
+        />
 
-          <textarea
-            rows={5}
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-3"
-          />
+        <select
+          name="stockStatus"
+          value={form.stockStatus}
+          onChange={handleChange}
+          className="border p-3 rounded-lg"
+        >
+          <option>In Stock</option>
+          <option>Out of Stock</option>
+        </select>
 
-        </div>
+        <h3 className="col-span-2 text-xl font-bold mt-5">
+          Shipping
+        </h3>
 
-        {/* Category */}
+        <input
+          name="weight"
+          value={form.shipping.weight}
+          onChange={handleShipping}
+          placeholder="Weight"
+          className="border p-3 rounded-lg"
+        />
 
-        <div>
+        <input
+          name="length"
+          value={form.shipping.length}
+          onChange={handleShipping}
+          placeholder="Length"
+          className="border p-3 rounded-lg"
+        />
 
-          <label className="font-semibold block mb-2">
-            Category
-          </label>
+        <input
+          name="width"
+          value={form.shipping.width}
+          onChange={handleShipping}
+          placeholder="Width"
+          className="border p-3 rounded-lg"
+        />
 
-          <select
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-3"
-          >
-            <option>Shoes</option>
-            <option>Electronics</option>
-            <option>Fashion</option>
-            <option>Accessories</option>
-          </select>
+        <input
+          name="height"
+          value={form.shipping.height}
+          onChange={handleShipping}
+          placeholder="Height"
+          className="border p-3 rounded-lg"
+        />
 
-        </div>
+        <input
+          name="shippingCharge"
+          value={form.shipping.shippingCharge}
+          onChange={handleShipping}
+          placeholder="Shipping Charge"
+          className="border p-3 rounded-lg"
+        />
 
-        {/* Price */}
+        <input
+          name="deliveryTime"
+          value={form.shipping.deliveryTime}
+          onChange={handleShipping}
+          placeholder="Delivery Time"
+          className="border p-3 rounded-lg"
+        />
 
-        <div className="grid md:grid-cols-2 gap-6">
-
-          <div>
-
-            <label className="font-semibold block mb-2">
-              Price
-            </label>
-
-            <input
-              type="number"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-              className="w-full border rounded-lg p-3"
-            />
-
-          </div>
-
-          <div>
-
-            <label className="font-semibold block mb-2">
-              Stock
-            </label>
-
-            <input
-              type="number"
-              name="stock"
-              value={formData.stock}
-              onChange={handleChange}
-              className="w-full border rounded-lg p-3"
-            />
-
-          </div>
-
-        </div>
-
-        {/* Buttons */}
-
-        <div className="flex justify-end gap-4">
-
-          <button
-            type="button"
-            className="px-6 py-3 border rounded-lg hover:bg-gray-100"
-          >
-            Cancel
-          </button>
+        <div className="col-span-2 flex gap-4 mt-5">
 
           <button
             type="submit"
-            className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg"
+            className="bg-orange-500 text-white px-8 py-3 rounded-lg"
           >
-            <Save size={18} />
-            Save Changes
+            Update Product
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActivePage("products")}
+            className="border px-8 py-3 rounded-lg"
+          >
+            Cancel
           </button>
 
         </div>

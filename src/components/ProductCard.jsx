@@ -76,7 +76,7 @@ export default function ProductCard({ product, onViewDetails, onAddToCart }) {
         <div className="mt-auto pt-2.5 border-t border-gray-50  flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-lg font-black text-slate-900 ">
-              ₹{product.price.toLocaleString("en-IN")}
+              ₹{product.price?.toLocaleString("en-IN")}
             </span>
             <span className="text-[11px] font-bold text-green-600  flex items-center gap-1 mt-0.5">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />

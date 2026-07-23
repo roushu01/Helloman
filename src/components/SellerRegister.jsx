@@ -14,7 +14,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import { useClerk } from "@clerk/clerk-react";
+import { useClerk,useUser} from "@clerk/clerk-react";
 import { useSignUp, useSignIn } from "@clerk/clerk-react";
 export default function SellerRegister({ onSellerLogin }) {
   const [authMode, setAuthMode] = useState("login"); // "login" | "signup"
@@ -22,9 +22,12 @@ export default function SellerRegister({ onSellerLogin }) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading,setLoading] = useState(false);
   const [clerkUserId, setClerkUserId] = useState("");
+
   const [isLoggedIn,setIsLoggedIn] = useState(false);
   const [step, setStep] = useState(1);
   const { signOut } = useClerk();
+  const {user}=useUser();
+
   const {signUp,setActive: setSignUpActive,isLoaded: isSignUpLoaded} = useSignUp();
   const {
  signIn,
@@ -122,6 +125,64 @@ const [loginStep,setLoginStep]=useState(1);
   }
 
 };
+const fetchSellerDetails = async () => {
+
+  try {
+
+    const res = await api.post(
+      "/api/sellers/get-user-details",
+      {
+        email:loginEmail
+      }
+    );
+
+
+    console.log("Seller Details:", res.data);
+
+
+    const seller = res.data.data;
+
+
+    localStorage.setItem(
+      "clerkId",
+      seller.clerkUserId
+    );
+
+
+    const sellerUser = {
+
+      id:seller.userId,
+
+      clerkId:seller.clerkUserId,
+
+      role:"seller",
+
+      email:seller.email,
+
+      name:
+      `${seller.firstName} ${seller.lastName}`
+
+    };
+
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(sellerUser)
+    );
+
+
+    onSellerLogin(sellerUser);
+
+
+  } catch(error){
+
+    console.log(
+      error.response?.data
+    );
+
+  }
+
+};
 const handleVerifyOtp = async () => {
   try {
     setVerifyingOtp(true);
@@ -148,47 +209,21 @@ const handleVerifyOtp = async () => {
 
         if(result.status==="complete"){
 
-        await setSignInActive({
-          session: result.createdSessionId
-        });
+            await setSignInActive({
+            session: result.createdSessionId
+            });
 
 
-        setIsLoggedIn(true);
+            setIsLoggedIn(true);
 
 
-        const sellerUser = {
-
-            id: result.userId,
-
-            clerkId: result.userId,
-
-            role:"seller",
-
-            email:loginEmail,
-
-            name:"Seller"
-
-          };
+            // Fetch seller from backend
+            await fetchSellerDetails();
 
 
-          localStorage.setItem(
-            "clerkId",
-            result.userId
-          );
+            alert("Login successful");
 
-
-          localStorage.setItem(
-            "user",
-            JSON.stringify(sellerUser)
-          );
-
-
-          onSellerLogin(sellerUser);
-
-
-        alert("Login successful");
-
-        }
+            }
 
         }catch(err){
 
